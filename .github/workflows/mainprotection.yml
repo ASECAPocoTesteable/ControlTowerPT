@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Protect Main
-        if: 1 != 2
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
           echo "Main is protected"
           exit 1
