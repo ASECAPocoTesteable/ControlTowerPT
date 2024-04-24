@@ -8,4 +8,5 @@ class ControlTowerPtApplication
 
 fun main(args: Array<String>) {
 	runApplication<ControlTowerPtApplication>(*args)
+
 }
