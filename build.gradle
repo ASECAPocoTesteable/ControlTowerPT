@@ -8,7 +8,7 @@ plugins {
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.23'
 }
 
-group = 'com.AECA'
+group = 'com.ASECA'
 version = '0.0.1-SNAPSHOT'
 
 java {
