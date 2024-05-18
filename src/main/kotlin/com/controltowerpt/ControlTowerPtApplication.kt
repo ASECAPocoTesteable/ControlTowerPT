@@ -1,4 +1,4 @@
-package com.AECA.ControlTowerPT
+package com.controltowerpt
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -7,5 +7,7 @@ import org.springframework.boot.runApplication
 class ControlTowerPtApplication
 
 fun main(args: Array<String>) {
-	runApplication<ControlTowerPtApplication>(*args)
+    runApplication<ControlTowerPtApplication>(
+        *args,
+    )
 }

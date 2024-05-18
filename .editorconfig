@@ -1,0 +1,3 @@
+
+[*]
+ij_kotlin_packages_to_use_import_on_demand = *,jakarta.persistence.*,java.*,java.util.*
