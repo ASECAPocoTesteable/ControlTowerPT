@@ -8,11 +8,11 @@ plugins {
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.23'
 }
 
-group = 'com.AECA'
+group = 'com.ASECA'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+	sourceCompatibility = JavaVersion.VERSION_17
 }
 
 configurations {
@@ -25,25 +25,58 @@ repositories {
 	mavenCentral()
 }
 
+configurations {
+	ktlint
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+	implementation 'org.postgresql:postgresql:42.7.2'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	ktlint("com.pinterest.ktlint:ktlint-cli:1.2.1") {
+		attributes {
+			attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
+		}
+	}
 }
+
 
 tasks.withType(KotlinCompile) {
 	kotlinOptions {
 		freeCompilerArgs += '-Xjsr305=strict'
-		jvmTarget = '21'
+		jvmTarget = '17'
 	}
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.register("ktlintCheck", JavaExec) {
+	group = "verification"
+	description = "Check Kotlin code style."
+	classpath = configurations.ktlint
+	mainClass = "com.pinterest.ktlint.Main"
+	// see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
+	args "src/**/*.kt", "**.kts", "!**/build/**"
+}
+
+tasks.named("check") {
+	dependsOn tasks.named("ktlintCheck")
+}
+
+tasks.register("ktlintFormat", JavaExec) {
+	group = "formatting"
+	description = "Fix Kotlin code style deviations."
+	classpath = configurations.ktlint
+	mainClass = "com.pinterest.ktlint.Main"
+	jvmArgs "--add-opens=java.base/java.lang=ALL-UNNAMED"
+	// see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
+	args "-F", "src/**/*.kt", "**.kts", "!**/build/**"
 }
