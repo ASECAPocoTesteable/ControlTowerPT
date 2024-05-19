@@ -7,6 +7,7 @@ import org.springframework.boot.runApplication
 class ControlTowerPtApplication
 
 fun main(args: Array<String>) {
+    val args = arrayOf<String>()
     runApplication<ControlTowerPtApplication>(
         *args,
     )
