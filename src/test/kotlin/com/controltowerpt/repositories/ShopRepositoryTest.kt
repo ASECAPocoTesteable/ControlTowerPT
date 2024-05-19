@@ -1,7 +1,9 @@
 package com.controltowerpt.repositories
 
 import com.controltowerpt.models.Shop
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -15,44 +17,42 @@ class ShopRepositoryTest {
     @Autowired
     lateinit var shopRepository: ShopRepository
 
+    @AfterEach
+    fun cleanUp() {
+        shopRepository.deleteAll()
+    }
+
     @Test
     fun test001CreateShop() {
         val shop = Shop(name = "Test Shop")
-
         val savedShop = entityManager.persist(shop)
-
         entityManager.flush()
-
         val retrievedShop = savedShop.id?.let { shopRepository.findById(it).orElse(null) }
         assertEquals(shop.name, retrievedShop?.name)
-        if (retrievedShop != null) {
-            assertEquals(1, retrievedShop.id)
-        }
+        assertNotNull(retrievedShop?.id)
     }
 
     @Test
-    fun test002FindShopByIdShouldBeSuccesful()  {
+    fun test002FindShopByIdShouldBeSuccesful() {
         val shop = Shop(name = "Test Shop")
         val savedShop = entityManager.persist(shop)
         entityManager.flush()
         val retrievedShop = savedShop.id?.let { shopRepository.findById(it).orElse(null) }
         assertEquals(shop.name, retrievedShop?.name)
-        if (retrievedShop != null) {
-            assertEquals(1, retrievedShop.id)
-        }
+        assertEquals(savedShop.id, retrievedShop?.id)
     }
 
     @Test
-    fun test003FindShopByIdIsNotExistantShouldReturnNull()  {
+    fun test003FindShopByIdIsNotExistantShouldReturnNull() {
         val shop = Shop(name = "Test Shop")
         entityManager.persist(shop)
         entityManager.flush()
-        val retrievedShop = shopRepository.findById(2).orElse(null)
+        val retrievedShop = shopRepository.findById(5).orElse(null)
         assertEquals(null, retrievedShop)
     }
 
     @Test
-    fun test004DeleteShopByIdShouldBeSuccesful()  {
+    fun test004DeleteShopByIdShouldBeSuccesful() {
         val shop = Shop(name = "Test Shop")
         val savedShop = entityManager.persist(shop)
         entityManager.flush()
@@ -62,7 +62,7 @@ class ShopRepositoryTest {
     }
 
     @Test
-    fun test005DeleteShopByIdIsNotExistantShouldReturnNull()  {
+    fun test005DeleteShopByIdIsNotExistantShouldReturnNull() {
         val shop = Shop(name = "Test Shop")
         entityManager.persist(shop)
         entityManager.flush()

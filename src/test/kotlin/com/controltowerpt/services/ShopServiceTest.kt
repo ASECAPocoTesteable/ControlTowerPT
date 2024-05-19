@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
-import org.mockito.kotlin.whenever
 import java.util.Optional
 
 class ShopServiceTest {
@@ -51,7 +50,7 @@ class ShopServiceTest {
     }
 
     @Test
-    fun test004FindShopByIdIfShopDosentExistShouldThrowException()  {
+    fun test004FindShopByIdIfShopDosentExistShouldThrowException() {
         `when`(shopRepository.findById(1)).thenReturn(java.util.Optional.empty())
 
         val exception =
@@ -72,9 +71,8 @@ class ShopServiceTest {
         verify(shopRepository).delete(shop)
     }
 
-
     @Test
-    fun test006DeleteShopByIdIsNotExistantShouldReturnNull()  {
+    fun test006DeleteShopByIdIsNotExistantShouldReturnNull() {
         `when`(shopRepository.findById(2)).thenReturn(Optional.empty())
         assertThrows<EntityNotFoundException> {
             shopService.deleteShopById(2)
@@ -82,7 +80,7 @@ class ShopServiceTest {
     }
 
     @Test
-    fun test008DeleteShopByIdWhenIdIsLessThanOneShouldThrowException()  {
+    fun test008DeleteShopByIdWhenIdIsLessThanOneShouldThrowException() {
         val shop = Shop(name = "Test Shop")
         `when`(shopRepository.save(any(Shop::class.java))).thenReturn(shop)
         val savedShop = shopService.createShop(shop)

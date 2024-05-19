@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/shop")
 class ShopController(private val shopService: ShopService) {
     @PostMapping("/add")
-    fun postSaveShop(@RequestBody shop: SaveShopRequest ): ResponseEntity<*> {
+    fun postSaveShop(
+        @RequestBody shop: SaveShopRequest,
+    ): ResponseEntity<*> {
         return try {
             val shopCreated = shopService.createShop(Shop(shop.shopName))
             val res = ShopResponse(shopCreated.name)
@@ -28,9 +30,10 @@ class ShopController(private val shopService: ShopService) {
         }
     }
 
-
     @GetMapping("/get")
-    fun getShop(@RequestParam id : Long): ResponseEntity<*> {
+    fun getShop(
+        @RequestParam id: Long,
+    ): ResponseEntity<*> {
         return try {
             val shop = shopService.findShopById(id)
             val res = shop?.let { ShopResponse(it.name) }
@@ -39,5 +42,4 @@ class ShopController(private val shopService: ShopService) {
             return ResponseEntity.badRequest().body(e.message)
         }
     }
-
 }

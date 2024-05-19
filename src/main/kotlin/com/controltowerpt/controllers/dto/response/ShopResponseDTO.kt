@@ -1,4 +1,7 @@
-
 data class ShopResponse(
-    val name : String
+    val name: String,
+)
+
+data class SaveShopRequest(
+    val shopName: String,
 )

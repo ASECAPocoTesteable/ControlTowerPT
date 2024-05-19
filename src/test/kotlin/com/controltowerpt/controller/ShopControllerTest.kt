@@ -12,8 +12,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @WebMvcTest(ShopController::class)
@@ -57,7 +57,7 @@ class ShopControllerTest {
     }
 
     @Test
-    fun test003GetShopByIdSuccess(){
+    fun test003GetShopByIdSuccess() {
         val shopName = "Test Shop"
         val shop = Shop(name = shopName)
         val shopId = 1L
@@ -73,7 +73,7 @@ class ShopControllerTest {
     }
 
     @Test
-    fun test004GetShopByIdNotFoundShouldBadRequest(){
+    fun test004GetShopByIdNotFoundShouldBadRequest() {
         val shopId = 1L
         whenever(shopService.findShopById(shopId)).thenThrow(EntityNotFoundException("Shop not found"))
 
@@ -86,7 +86,7 @@ class ShopControllerTest {
     }
 
     @Test
-    fun test005GetShopByIdWhenIdIsLowerThan0ShouldBadRequest(){
+    fun test005GetShopByIdWhenIdIsLowerThan0ShouldBadRequest() {
         val shopId = -1L
         whenever(shopService.findShopById(shopId)).thenThrow(IllegalArgumentException("Shop id must be greater than 0"))
 
