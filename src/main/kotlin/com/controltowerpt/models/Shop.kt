@@ -2,20 +2,18 @@ package com.controltowerpt.models
 
 import jakarta.persistence.*
 import lombok.Getter
-import lombok.Setter
 
 @Entity
 @Table(name = "shop")
 @Getter
-@Setter
-class Shop {
+class Shop(
+    @Column(nullable = false)
+    val name: String = "",
+) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, unique = true)
-    private val id: Long? = null
-
-    @Column(nullable = false)
-    private val name: String = ""
+    val id: Long? = null
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -23,5 +21,5 @@ class Shop {
         joinColumns = [JoinColumn(name = "shop_id")],
         inverseJoinColumns = [JoinColumn(name = "warehouse_id")],
     )
-    private val warehouses: Set<Warehouse> = HashSet()
+    val warehouses: Set<Warehouse> = HashSet()
 }
