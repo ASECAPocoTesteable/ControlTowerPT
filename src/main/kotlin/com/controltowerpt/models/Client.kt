@@ -8,28 +8,14 @@ import lombok.Getter
 @Getter
 class Client {
     @Id
-    @GeneratedValue(
-        strategy = GenerationType.IDENTITY,
-    )
-    @Column(
-        nullable = false,
-        unique = true,
-    )
-    private var id:
-        Long = 0
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
+    private var id: Long = 0
 
-    @Column(
-        nullable = false,
-    )
-    private val email =
-        ""
+    @Column(nullable = false)
+    private val email = ""
 
-    @ManyToOne(
-        fetch = FetchType.LAZY,
-    )
-    @JoinColumn(
-        name = "shop_id",
-    )
-    private var shopId:
-        Shop = Shop()
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    private var shopId: Shop = Shop()
 }

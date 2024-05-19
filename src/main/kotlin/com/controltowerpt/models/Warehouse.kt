@@ -8,18 +8,11 @@ import lombok.Getter
 @Getter
 class Warehouse {
     @Id
-    @GeneratedValue(
-        strategy = GenerationType.IDENTITY,
-    )
-    @Column(
-        nullable = false,
-        unique = true,
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
     private var id: Long = 0
 
-    @Column(
-        nullable = false,
-    )
+    @Column(nullable = false)
     private var direction: String = ""
 
     @ManyToMany(mappedBy = "warehouses")
