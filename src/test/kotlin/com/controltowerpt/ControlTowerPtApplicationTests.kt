@@ -2,14 +2,13 @@ package com.controltowerpt
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class ControlTowerPtApplicationTests {
+
     @Test
-    fun test001Test1plus1() {
-        assertThat(
-            1 + 1,
-        ).isEqualTo(
-            2,
-        )
+    fun contextLoads() {
     }
 }
