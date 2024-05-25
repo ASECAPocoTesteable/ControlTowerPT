@@ -42,7 +42,7 @@ class ShopServiceTest {
     fun test003FindShopByIdShouldBeSuccessful() {
         val shop = Shop(name = "Test Shop")
 
-        `when`(shopRepository.findById(1)).thenReturn(java.util.Optional.of(shop))
+        `when`(shopRepository.findById(1)).thenReturn(Optional.of(shop))
 
         val result = shopService.findShopById(1)
 
@@ -51,7 +51,7 @@ class ShopServiceTest {
 
     @Test
     fun test004FindShopByIdIfShopDosentExistShouldThrowException() {
-        `when`(shopRepository.findById(1)).thenReturn(java.util.Optional.empty())
+        `when`(shopRepository.findById(1)).thenReturn(Optional.empty())
 
         val exception =
             assertThrows<EntityNotFoundException> {
@@ -83,7 +83,7 @@ class ShopServiceTest {
     fun test008DeleteShopByIdWhenIdIsLessThanOneShouldThrowException() {
         val shop = Shop(name = "Test Shop")
         `when`(shopRepository.save(any(Shop::class.java))).thenReturn(shop)
-        val savedShop = shopService.createShop(shop)
+        shopService.createShop(shop)
         val exception =
             assertThrows<IllegalArgumentException> {
                 shopService.deleteShopById(0)
