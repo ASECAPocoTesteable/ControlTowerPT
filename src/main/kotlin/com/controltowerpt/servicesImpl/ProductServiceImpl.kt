@@ -2,17 +2,18 @@ package com.controltowerpt.servicesImpl
 
 import com.controltowerpt.models.Product
 import com.controltowerpt.repositories.ProductRepository
-import com.controltowerpt.repositories.ShopRepository
 import com.controltowerpt.services.ProductService
 import com.controltowerpt.services.ShopService
 import org.springframework.stereotype.Service
 import java.util.Optional
 
-
 @Service
 class ProductServiceImpl(private val productRepository: ProductRepository, private val shopService: ShopService) : ProductService {
-
-    override fun createProduct(name: String, price: Double, shopId: Long) : Product {
+    override fun createProduct(
+        name: String,
+        price: Double,
+        shopId: Long,
+    ): Product {
         if (name.isEmpty()) {
             throw IllegalArgumentException("Product name cannot be empty")
         }
@@ -24,9 +25,7 @@ class ProductServiceImpl(private val productRepository: ProductRepository, priva
         }
 
         val shop = shopService.findShopById(shopId) ?: throw IllegalArgumentException("Shop not found")
-
-        val product = Product(name = name, price = price, shopId = shop)
-
+        val product = Product(name = name, price = price, shop = shop)
         return productRepository.save(product)
     }
 
@@ -46,7 +45,10 @@ class ProductServiceImpl(private val productRepository: ProductRepository, priva
         return productRepository.findByShopId(shopId)
     }
 
-    override fun updateProductByPrice(newPrice: Double, id: Long): Product {
+    override fun updateProductByPrice(
+        newPrice: Double,
+        id: Long,
+    ): Product {
         if (id < 1) {
             throw IllegalArgumentException("Product id must be greater than 0")
         }
@@ -57,6 +59,4 @@ class ProductServiceImpl(private val productRepository: ProductRepository, priva
 
         return productRepository.findById(id).orElseThrow { IllegalArgumentException("Product not found") }
     }
-
-
 }

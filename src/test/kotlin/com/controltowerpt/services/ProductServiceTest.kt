@@ -3,21 +3,16 @@ package com.controltowerpt.services
 import com.controltowerpt.models.Product
 import com.controltowerpt.models.Shop
 import com.controltowerpt.repositories.ProductRepository
-import com.controltowerpt.repositories.ShopRepository
 import com.controltowerpt.servicesImpl.ProductServiceImpl
-import jakarta.persistence.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class ProductServiceTest {
-
     private val productRep: ProductRepository = mock()
 
     private val shopService: ShopService = mock()
@@ -30,7 +25,7 @@ class ProductServiceTest {
         val name = "Test Shop"
         val price = 10.0
         val shopId = 1L
-        val product = Product(name = "Test Product", price = 10.0, shopId = shop)
+        val product = Product(name = "Test Product", price = 10.0, shop = shop)
 
         whenever(productRep.save(any(Product::class.java))).thenReturn(product)
 
@@ -43,51 +38,51 @@ class ProductServiceTest {
 
     @Test
     fun test002createProductWithoutNameShouldThrowException() {
-        val shop = Shop(name = "")
         val name = ""
         val price = 10.0
         val shopId = 1L
 
-        val exception = assertThrows<IllegalArgumentException> {
-            productService.createProduct(name, price, shopId)
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                productService.createProduct(name, price, shopId)
+            }
 
         assertEquals("Product name cannot be empty", exception.message)
     }
 
     @Test
     fun test003createProductWithoutPriceShouldThrowException() {
-        val shop = Shop(name = "Test Shop")
         val name = "Test Shop"
         val price = 0.0
         val shopId = 1L
 
-        val exception = assertThrows<IllegalArgumentException> {
-            productService.createProduct(name, price, shopId)
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                productService.createProduct(name, price, shopId)
+            }
 
         assertEquals("Product price must be greater than 0", exception.message)
     }
 
     @Test
     fun test004createProductAndShopDoesNotExistShouldThrowException() {
-        val shop = Shop(name = "Test Shop")
         val name = "Test Shop"
         val price = 10.0
         val shopId = 1L
 
         whenever(shopService.findShopById(shopId)).thenReturn(null)
 
-        val exception = assertThrows<IllegalArgumentException> {
-            productService.createProduct(name, price, shopId)
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                productService.createProduct(name, price, shopId)
+            }
 
         assertEquals("Shop not found", exception.message)
     }
 
     @Test
     fun test005findProductByIdShouldSuccess() {
-        val product = Product(name = "Test Product", price = 10.0, shopId = Shop(name = "Test Shop"))
+        val product = Product(name = "Test Product", price = 10.0, shop = Shop(name = "Test Shop"))
         val id = 1L
 
         whenever(productRep.findById(id)).thenReturn(java.util.Optional.of(product))
@@ -112,7 +107,7 @@ class ProductServiceTest {
     fun test007findProductByIdIfIsLessThanOneShouldThrowException() {
         val id = 0L
 
-        val exception = assertThrows<IllegalArgumentException> {
+        assertThrows<IllegalArgumentException> {
             productService.findProductById(id)
         }
     }
@@ -120,7 +115,7 @@ class ProductServiceTest {
     @Test
     fun test008getAllProductsFromStore() {
         val shop = Shop(name = "Test Shop")
-        val product = Product(name = "Test Product", price = 10.0, shopId = shop)
+        val product = Product(name = "Test Product", price = 10.0, shop = shop)
         val products = listOf(product)
 
         whenever(productRep.findByShopId(1L)).thenReturn(products)
@@ -132,7 +127,7 @@ class ProductServiceTest {
 
     @Test
     fun test009updateProductPrice() {
-        val product = Product(name = "Test Product", price = 20.0, shopId = Shop(name = "Test Shop"))
+        val product = Product(name = "Test Product", price = 20.0, shop = Shop(name = "Test Shop"))
         val id = 1L
         val newPrice = 20.0
 
@@ -150,7 +145,7 @@ class ProductServiceTest {
         val id = 0L
         val newPrice = 20.0
 
-        val exception = assertThrows<IllegalArgumentException> {
+        assertThrows<IllegalArgumentException> {
             productService.updateProductByPrice(newPrice, id)
         }
     }
@@ -160,7 +155,7 @@ class ProductServiceTest {
         val id = 1L
         val newPrice = 0.0
 
-        val exception = assertThrows<IllegalArgumentException> {
+        assertThrows<IllegalArgumentException> {
             productService.updateProductByPrice(newPrice, id)
         }
     }
@@ -172,10 +167,8 @@ class ProductServiceTest {
 
         whenever(productRep.findById(id)).thenReturn(java.util.Optional.empty())
 
-        val exception = assertThrows<IllegalArgumentException> {
+        assertThrows<IllegalArgumentException> {
             productService.updateProductByPrice(newPrice, id)
         }
     }
-
-
 }

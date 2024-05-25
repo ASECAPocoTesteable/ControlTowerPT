@@ -32,7 +32,7 @@ class ProductRepositoryTest {
 
         val savedShop = entityManager.persist(shop)
 
-        val product = Product(name = "Test Product", price = 10.0, shopId = savedShop)
+        val product = Product(name = "Test Product", price = 10.0, shop = savedShop)
 
         val savedProduct = entityManager.persist(product)
 
@@ -49,13 +49,13 @@ class ProductRepositoryTest {
 
         val savedShop = entityManager.persist(shop)
 
-        val product = Product(name = "Test Product", price = 10.0, shopId = savedShop)
+        val product = Product(name = "Test Product", price = 10.0, shop = savedShop)
 
-        val product2 = Product(name = "Test Product 2", price = 20.0, shopId = savedShop)
+        val product2 = Product(name = "Test Product 2", price = 20.0, shop = savedShop)
 
-        val savedProduct = entityManager.persist(product)
+        entityManager.persist(product)
 
-        val saved2Product = entityManager.persist(product2)
+        entityManager.persist(product2)
 
         entityManager.flush()
 
@@ -74,9 +74,9 @@ class ProductRepositoryTest {
 
         val savedShop = entityManager.persist(shop)
 
-        val product = Product(name = "Test Product", price = 10.0, shopId = savedShop)
+        val product = Product(name = "Test Product", price = 10.0, shop = savedShop)
 
-        val savedProduct = entityManager.persist(product)
+        entityManager.persist(product)
 
         entityManager.flush()
 
@@ -100,7 +100,7 @@ class ProductRepositoryTest {
         val shop = Shop(name = "Test Shop")
         val savedShop = entityManager.persist(shop)
 
-        val product = Product(name = "Test Product", price = 10.0, shopId = savedShop)
+        val product = Product(name = "Test Product", price = 10.0, shop = savedShop)
         val savedProduct = entityManager.persist(product)
 
         entityManager.flush()
@@ -108,7 +108,7 @@ class ProductRepositoryTest {
         val retrievedProduct = savedProduct.id.let { productRepository.findById(it).orElse(null) }
         assertEquals(product.name, retrievedProduct?.name)
 
-        val rowsUpdated = productRepository.updateProductByPrice(20.0, savedProduct.id!!)
+        val rowsUpdated = productRepository.updateProductByPrice(20.0, savedProduct.id)
         entityManager.flush()
 
         assertEquals(1, rowsUpdated)
@@ -118,5 +118,4 @@ class ProductRepositoryTest {
         val retrievedProduct2 = savedProduct.id.let { productRepository.findById(it).orElse(null) }
         assertEquals(20.0, retrievedProduct2?.price)
     }
-
 }

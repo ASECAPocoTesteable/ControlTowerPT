@@ -10,12 +10,14 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ProductRepository : JpaRepository<Product, Long> {
-
-    @Query("SELECT p FROM Product p WHERE p.shopId.id = :shopId")
+    @Query("SELECT p FROM Product p WHERE p.shop.id = :shopId")
     fun findByShopId(shopId: Long): List<Product>
 
     @Modifying
     @Transactional
     @Query("UPDATE Product p SET p.price = :price WHERE p.id = :id")
-    fun updateProductByPrice(@Param("price") price: Double, @Param("id") id: Long): Int
+    fun updateProductByPrice(
+        @Param("price") price: Double,
+        @Param("id") id: Long,
+    ): Int
 }
