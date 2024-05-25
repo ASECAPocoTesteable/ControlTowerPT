@@ -70,7 +70,7 @@ class ProductControllerTest {
         )
 
         mockMvc.perform(
-            get("/product/get/id")
+            get("/product/getById?id=$id")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(id.toString()),
         )
@@ -98,7 +98,7 @@ class ProductControllerTest {
         )
 
         mockMvc.perform(
-            get("/product/get/shop")
+            get("/product/getByShopId?shop=$shopId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(shopId.toString()),
         )

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -31,9 +32,9 @@ class ProductController(private val productService: ProductService) {
         }
     }
 
-    @GetMapping("/get/id")
+    @GetMapping("/getById")
     fun getProductById(
-        @RequestBody req: Long,
+        @RequestParam("id") req: Long,
     ): ResponseEntity<*> {
         return try {
             val product = productService.findProductById(req)
@@ -53,9 +54,9 @@ class ProductController(private val productService: ProductService) {
         }
     }
 
-    @GetMapping("/get/shop")
+    @GetMapping("/getByShopId")
     fun getProductsByShopId(
-        @RequestBody req: Long,
+        @RequestParam("shop") req: Long,
     ): ResponseEntity<*> {
         return try {
             val products = productService.findAllByShopId(req)
