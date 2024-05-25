@@ -73,4 +73,22 @@ class ProductController(private val productService: ProductService) {
             ResponseEntity.badRequest().body(e.message)
         }
     }
+
+    @GetMapping("/getAll")
+    fun getAllProducts(): ResponseEntity<*> {
+        return try {
+            val products = productService.getAllProducts()
+            ResponseEntity.ok(
+                products.map {
+                    ProductResDTO(
+                        name = it.name,
+                        price = it.price,
+                        shopId = it.shop.id ?: throw IllegalArgumentException("Shop ID is missing"),
+                    )
+                },
+            )
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body(e.message)
+        }
+    }
 }

@@ -171,4 +171,17 @@ class ProductServiceTest {
             productService.updateProductByPrice(newPrice, id)
         }
     }
+
+    @Test
+    fun test013getAllProducts() {
+        val shop = Shop(name = "Test Shop")
+        val product = Product(name = "Test Product", price = 10.0, shop = shop)
+        val products = listOf(product)
+
+        whenever(productRep.findAll()).thenReturn(products)
+
+        val result = productService.getAllProducts()
+
+        assertEquals(products, result)
+    }
 }

@@ -18,4 +18,6 @@ interface ProductService {
         newPrice: Double,
         id: Long,
     ): Product
+
+    fun getAllProducts(): List<Product>
 }

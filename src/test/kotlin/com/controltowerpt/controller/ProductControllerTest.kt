@@ -125,4 +125,24 @@ class ProductControllerTest {
             .andExpect(status().isBadRequest)
             .andExpect(content().string("Product name cannot be empty"))
     }
+
+    @Test
+    fun test005findAllProducts() {
+        whenever(productService.getAllProducts()).thenReturn(
+            listOf(
+                Product(
+                    name = "Test Product",
+                    price = 10.0,
+                    shop = Shop(name = "Test Shop", 1L),
+                ),
+            ),
+        )
+
+        mockMvc.perform(
+            get("/product/getAll")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().string("[{\"name\":\"Test Product\",\"price\":10.0,\"shopId\":1}]"))
+    }
 }

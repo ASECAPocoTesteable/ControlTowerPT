@@ -59,4 +59,8 @@ class ProductServiceImpl(private val productRepository: ProductRepository, priva
 
         return productRepository.findById(id).orElseThrow { IllegalArgumentException("Product not found") }
     }
+
+    override fun getAllProducts(): List<Product> {
+        return productRepository.findAll()
+    }
 }
