@@ -3,42 +3,29 @@ package com.controltowerpt.models.manytomany
 import com.controltowerpt.models.Order
 import com.controltowerpt.models.Product
 import jakarta.persistence.*
+import lombok.AllArgsConstructor
+import lombok.Getter
+import lombok.NoArgsConstructor
+import lombok.Setter
 
 @Entity
-@Table
-class ProductOrder {
+@Table(name = "product_order")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+class ProductOrder(
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    val product: Product,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    val order: Order,
+    @Column(nullable = false)
+    val amount: Int,
+) {
     @Id
-    @GeneratedValue(
-        strategy = GenerationType.IDENTITY,
-    )
-    @Column(
-        nullable = false,
-        unique = true,
-    )
-    private var id:
-        Long = 0
-
-    @ManyToOne(
-        fetch = FetchType.LAZY,
-    )
-    @JoinColumn(
-        name = "product_id",
-    )
-    private var product:
-        Product = Product()
-
-    @ManyToOne(
-        fetch = FetchType.LAZY,
-    )
-    @JoinColumn(
-        name = "order_id",
-    )
-    private var order:
-        Order = Order()
-
-    @Column(
-        nullable = false,
-    )
-    private var amount:
-        Int = 0
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
+    val id: Long = 0
 }
