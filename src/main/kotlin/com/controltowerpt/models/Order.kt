@@ -12,31 +12,20 @@ import lombok.Setter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-class Order {
+class Order(
+    val direction: String = "",
+    val state: OrderState = OrderState.PREPARING,
+) {
     @Id
-    @GeneratedValue(
-        strategy = GenerationType.IDENTITY,
-    )
-    @Column(
-        nullable = false,
-        unique = true,
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
     private var id:
         Long = 0
+}
 
-    @ManyToOne(
-        fetch = FetchType.LAZY,
-    )
-    @JoinColumn(
-        name = "client_id",
-    )
-    private var clientId: Client = Client()
-
-    @ManyToOne(
-        fetch = FetchType.LAZY,
-    )
-    @JoinColumn(
-        name = "shop_id",
-    )
-    private var shopId: Shop = Shop()
+enum class OrderState {
+    PREPARING,
+    PREPARED,
+    IN_DELIVERY,
+    DELIVERED,
 }
