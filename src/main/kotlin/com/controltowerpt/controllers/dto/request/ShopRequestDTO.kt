@@ -4,6 +4,7 @@ data class SaveShopRequest(
     val shopName: String,
 )
 
-data class GetByShopIDRequest(
-    val shopID: Long,
+data class UpdateProductPrice(
+    val id: Long,
+    val price: Double,
 )

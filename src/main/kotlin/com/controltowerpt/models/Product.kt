@@ -11,9 +11,6 @@ class Product(
     val name: String = "",
     @Column(nullable = false)
     var price: Double = 0.0,
-    @ManyToOne
-    @JoinColumn(name = "shop_id")
-    val shop: Shop = Shop(),
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

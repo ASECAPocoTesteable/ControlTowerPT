@@ -7,12 +7,9 @@ interface ProductService {
     fun createProduct(
         name: String,
         price: Double,
-        shopId: Long,
     ): Product
 
     fun findProductById(id: Long): Optional<Product>
-
-    fun findAllByShopId(shopId: Long): List<Product>
 
     fun updateProductByPrice(
         newPrice: Double,
@@ -20,4 +17,6 @@ interface ProductService {
     ): Product
 
     fun getAllProducts(): List<Product>
+
+    fun deleteProduct(id: Long)
 }
