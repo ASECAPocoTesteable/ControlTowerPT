@@ -21,7 +21,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class OrderServiceTest {
-
     private val productRepository: ProductRepository = mock(ProductRepository::class.java)
     private val orderRepository: OrderRepository = mock(OrderRepository::class.java)
     private val warehouseService: WarehouseService = mock(WarehouseService::class.java)
@@ -29,13 +28,15 @@ class OrderServiceTest {
 
     @Test
     fun testCreateOrderSuccessfully() {
-        val orderCreateDTO = CreateOrderRequest(
-            direction = "Test Direction",
-            products = listOf(
-                ProductQuantity(productId = 1, quantity = 1),
-                ProductQuantity(productId = 2, quantity = 2),
+        val orderCreateDTO =
+            CreateOrderRequest(
+                direction = "Test Direction",
+                products =
+                    listOf(
+                        ProductQuantity(productId = 1, quantity = 1),
+                        ProductQuantity(productId = 2, quantity = 2),
+                    ),
             )
-        )
 
         val product1 = Product("Product1", 100.0).apply { id = 1L }
         val product2 = Product("Product2", 200.0).apply { id = 2L }
@@ -44,13 +45,15 @@ class OrderServiceTest {
         whenever(productRepository.findById(2L)).thenReturn(Optional.of(product2))
         whenever(warehouseService.checkStock(orderCreateDTO.products)).thenReturn(Mono.just(true))
 
-        val order = Order(direction = "Test Direction").apply {
-            id = 1L
-            productOrders = mutableListOf(
-                ProductOrder(product = product1, order = this, amount = 1),
-                ProductOrder(product = product2, order = this, amount = 2)
-            )
-        }
+        val order =
+            Order(direction = "Test Direction").apply {
+                id = 1L
+                productOrders =
+                    mutableListOf(
+                        ProductOrder(product = product1, order = this, amount = 1),
+                        ProductOrder(product = product2, order = this, amount = 2),
+                    )
+            }
 
         whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
 
@@ -76,16 +79,18 @@ class OrderServiceTest {
 
     @Test
     fun testCreateOrderWithInsufficientStock() {
-        val orderCreateDTO = CreateOrderRequest(
-            direction = "Test Direction",
-            products = listOf(ProductQuantity(productId = 1, quantity = 5))
-        )
+        val orderCreateDTO =
+            CreateOrderRequest(
+                direction = "Test Direction",
+                products = listOf(ProductQuantity(productId = 1, quantity = 5)),
+            )
 
         whenever(warehouseService.checkStock(orderCreateDTO.products)).thenReturn(Mono.just(false))
 
-        val exception = assertThrows(Exception::class.java) {
-            orderService.createOrder(orderCreateDTO).block()
-        }
+        val exception =
+            assertThrows(Exception::class.java) {
+                orderService.createOrder(orderCreateDTO).block()
+            }
         assertEquals("java.lang.Exception: Failed to create order due to: Stock is not sufficient", exception.message)
 
         verify(warehouseService, times(1)).checkStock(orderCreateDTO.products)
@@ -93,10 +98,11 @@ class OrderServiceTest {
 
     @Test
     fun testCreateOrderWithWarehouseServiceDown() {
-        val orderCreateDTO = CreateOrderRequest(
-            direction = "Test Direction",
-            products = listOf(ProductQuantity(productId = 1, quantity = 1))
-        )
+        val orderCreateDTO =
+            CreateOrderRequest(
+                direction = "Test Direction",
+                products = listOf(ProductQuantity(productId = 1, quantity = 1)),
+            )
 
         whenever(warehouseService.checkStock(orderCreateDTO.products)).thenReturn(Mono.error(RuntimeException("Warehouse service down")))
 
@@ -109,13 +115,15 @@ class OrderServiceTest {
 
     @Test
     fun testCreateOrderWithMultipleConcurrentCalls() {
-        val orderCreateDTO = CreateOrderRequest(
-            direction = "Test Direction",
-            products = listOf(
-                ProductQuantity(productId = 1, quantity = 1),
-                ProductQuantity(productId = 2, quantity = 2)
+        val orderCreateDTO =
+            CreateOrderRequest(
+                direction = "Test Direction",
+                products =
+                    listOf(
+                        ProductQuantity(productId = 1, quantity = 1),
+                        ProductQuantity(productId = 2, quantity = 2),
+                    ),
             )
-        )
 
         val product1 = Product("Product1", 100.0).apply { id = 1L }
         val product2 = Product("Product2", 200.0).apply { id = 2L }
@@ -124,13 +132,15 @@ class OrderServiceTest {
         whenever(productRepository.findById(2L)).thenReturn(Optional.of(product2))
         whenever(warehouseService.checkStock(orderCreateDTO.products)).thenReturn(Mono.just(true))
 
-        val order = Order(direction = "Test Direction").apply {
-            id = 1L
-            productOrders = mutableListOf(
-                ProductOrder(product = product1, order = this, amount = 1),
-                ProductOrder(product = product2, order = this, amount = 2)
-            )
-        }
+        val order =
+            Order(direction = "Test Direction").apply {
+                id = 1L
+                productOrders =
+                    mutableListOf(
+                        ProductOrder(product = product1, order = this, amount = 1),
+                        ProductOrder(product = product2, order = this, amount = 2),
+                    )
+            }
 
         whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
 
@@ -140,7 +150,7 @@ class OrderServiceTest {
 
         Mono.zip(
             createOrderMono.doOnTerminate { latch.countDown() },
-            createOrderMono.doOnTerminate { latch.countDown() }
+            createOrderMono.doOnTerminate { latch.countDown() },
         ).subscribe()
 
         assertTrue(latch.await(5, TimeUnit.SECONDS))

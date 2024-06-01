@@ -16,9 +16,8 @@ import java.time.Duration
 class OrderServiceImpl(
     private val orderRepository: OrderRepository,
     private val productRepository: ProductRepository,
-    private val warehouseService: WarehouseService
+    private val warehouseService: WarehouseService,
 ) : OrderService {
-
     override fun createOrder(orderCreateDTO: CreateOrderRequest): Mono<Order> {
         if (orderCreateDTO.direction.isEmpty()) {
             return Mono.error(IllegalArgumentException("Direction cannot be empty"))
@@ -39,7 +38,7 @@ class OrderServiceImpl(
 
         // Check stock using WarehouseService with retry logic
         return warehouseService.checkStock(orderCreateDTO.products)
-            .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))  // Retry 3 times with a backoff of 1 second
+            .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))) // Retry 3 times with a backoff of 1 second
             .flatMap { isStockSufficient ->
                 if (!isStockSufficient) {
                     return@flatMap Mono.error<Order>(Exception("Stock is not sufficient"))

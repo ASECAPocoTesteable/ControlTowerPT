@@ -7,8 +7,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Service
-class WarehouseService(@Autowired private val webClient: WebClient) {
-
+class WarehouseService(
+    @Autowired private val webClient: WebClient,
+) {
     fun checkStock(products: List<ProductQuantity>): Mono<Boolean> {
         val url = "http://localhost:8081/warehouse/stock/check"
 
