@@ -1,4 +1,4 @@
 
 [*]
-ij_kotlin_packages_to_use_import_on_demand = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*,org.springframework.web.bind.annotation.*,*,jakarta.persistence.*,java.*,java.util.*,org.springframework.test.web.servlet.result.MockMvcResultMatchers.*,org.mockito.Mockito.*
+ij_kotlin_packages_to_use_import_on_demand = org.junit.jupiter.api.Assertions.*,org.springframework.test.web.servlet.request.MockMvcRequestBuilders.* ,org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*,org.springframework.web.bind.annotation.*,*,jakarta.persistence.*,java.*,java.util.*,org.springframework.test.web.servlet.result.MockMvcResultMatchers.*,org.mockito.Mockito.*
 ktlint_function_signature_body_expression_wrapping = default

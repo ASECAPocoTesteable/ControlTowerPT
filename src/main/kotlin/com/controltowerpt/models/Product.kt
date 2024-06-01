@@ -15,5 +15,5 @@ class Product(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, unique = true)
-    val id: Long = 0
+    var id: Long = 0
 }
