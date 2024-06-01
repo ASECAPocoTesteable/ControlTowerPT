@@ -26,7 +26,6 @@ class OrderServiceImpl(
             return Mono.error(IllegalArgumentException("Products cannot be empty"))
         }
 
-        // Pre-validation of product details
         orderCreateDTO.products.forEach { productQuantity ->
             if (productQuantity.productId < 1) {
                 return Mono.error(IllegalArgumentException("Product id must be greater than 0"))
@@ -36,15 +35,13 @@ class OrderServiceImpl(
             }
         }
 
-        // Check stock using WarehouseService with retry logic
         return warehouseService.checkStock(orderCreateDTO.products)
-            .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))) // Retry 3 times with a backoff of 1 second
+            .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))
             .flatMap { isStockSufficient ->
                 if (!isStockSufficient) {
                     return@flatMap Mono.error<Order>(Exception("Stock is not sufficient"))
                 }
 
-                // Defer the blocking call to save the order
                 Mono.defer {
                     val order = Order(direction = orderCreateDTO.direction)
                     orderCreateDTO.products.forEach { productQuantity ->
@@ -56,12 +53,15 @@ class OrderServiceImpl(
                         order.productOrders.add(productOrder)
                     }
                     Mono.fromCallable { orderRepository.save(order) }
-                        .subscribeOn(Schedulers.boundedElastic()) // Ensure blocking calls are done on a separate thread
+                        .subscribeOn(Schedulers.boundedElastic())
                 }
             }
             .onErrorResume { throwable ->
-                // Handle errors, such as warehouse service being down
                 Mono.error(Exception("Failed to create order due to: ${throwable.message}", throwable))
             }
+    }
+
+    override fun getAllOrders(): List<Order> {
+        return orderRepository.findAll()
     }
 }

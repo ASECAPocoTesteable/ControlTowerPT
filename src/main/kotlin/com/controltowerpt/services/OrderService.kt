@@ -6,4 +6,6 @@ import reactor.core.publisher.Mono
 
 interface OrderService {
     fun createOrder(orderCreateDTO: CreateOrderRequest): Mono<Order>
+
+    fun getAllOrders(): List<Order>
 }

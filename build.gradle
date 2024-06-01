@@ -6,6 +6,7 @@ plugins {
 	id 'org.jetbrains.kotlin.jvm' version '1.9.23'
 	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.23'
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.23'
+    id 'jacoco'
 }
 
 group = 'com.ASECA'
@@ -58,8 +59,18 @@ tasks.withType(KotlinCompile) {
 	}
 }
 
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
 tasks.named('test') {
 	useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 tasks.register("ktlintCheck", JavaExec) {

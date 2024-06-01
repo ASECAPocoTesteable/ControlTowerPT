@@ -27,7 +27,7 @@ class OrderServiceTest {
     private var orderService: OrderService = OrderServiceImpl(orderRepository, productRepository, warehouseService)
 
     @Test
-    fun testCreateOrderSuccessfully() {
+    fun test001CreateOrderSuccessfully() {
         val orderCreateDTO =
             CreateOrderRequest(
                 direction = "Test Direction",
@@ -78,7 +78,7 @@ class OrderServiceTest {
     }
 
     @Test
-    fun testCreateOrderWithInsufficientStock() {
+    fun test002CreateOrderWithInsufficientStock() {
         val orderCreateDTO =
             CreateOrderRequest(
                 direction = "Test Direction",
@@ -97,7 +97,7 @@ class OrderServiceTest {
     }
 
     @Test
-    fun testCreateOrderWithWarehouseServiceDown() {
+    fun test003CreateOrderWithWarehouseServiceDown() {
         val orderCreateDTO =
             CreateOrderRequest(
                 direction = "Test Direction",
@@ -114,7 +114,7 @@ class OrderServiceTest {
     }
 
     @Test
-    fun testCreateOrderWithMultipleConcurrentCalls() {
+    fun test004CreateOrderWithMultipleConcurrentCalls() {
         val orderCreateDTO =
             CreateOrderRequest(
                 direction = "Test Direction",
@@ -159,5 +159,23 @@ class OrderServiceTest {
         verify(productRepository, times(2)).findById(2L)
         verify(warehouseService, times(1)).checkStock(orderCreateDTO.products)
         verify(orderRepository, times(2)).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test005GetAllOrders() {
+        val order1 = Order(direction = "Test Direction 1").apply { id = 1L }
+        val order2 = Order(direction = "Test Direction 2").apply { id = 2L }
+        val order3 = Order(direction = "Test Direction 3").apply { id = 3L }
+
+        whenever(orderRepository.findAll()).thenReturn(listOf(order1, order2, order3))
+
+        val orders = orderService.getAllOrders()
+
+        assertEquals(3, orders.size)
+        assertEquals("Test Direction 1", orders[0].direction)
+        assertEquals("Test Direction 2", orders[1].direction)
+        assertEquals("Test Direction 3", orders[2].direction)
+
+        verify(orderRepository, times(1)).findAll()
     }
 }
