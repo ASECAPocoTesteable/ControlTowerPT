@@ -2,6 +2,7 @@ package com.controltowerpt.controllers
 
 import com.controltowerpt.services.OrderService
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,13 +20,21 @@ class WarehouseController(private val orderService: OrderService) {
         return orderService.orderIsReady(orderId)
             .map { success ->
                 if (success) {
-                    ResponseEntity.ok("Delivery service was reached successfully.")
+                    ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("Delivery service was reached successfully.")
                 } else {
-                    ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Failed to reach delivery service.")
+                    ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("Failed to reach delivery service.")
                 }
             }
             .onErrorResume { e ->
-                Mono.just(ResponseEntity.badRequest().body(e.message))
+                Mono.just(
+                    ResponseEntity.badRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(e.message),
+                )
             }
     }
 }

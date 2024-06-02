@@ -4,7 +4,6 @@ import com.controltowerpt.controllers.AdminController
 import com.controltowerpt.models.Product
 import com.controltowerpt.services.ProductService
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -170,5 +169,36 @@ class AdminControllerTest {
         )
             .andExpect(status().isBadRequest)
             .andExpect(content().string("Product not found"))
+    }
+
+    @Test
+    fun test010GetShopSuccess() {
+        val productList =
+            listOf(
+                Product(name = "Product1", price = 100.0).apply { id = 1L },
+                Product(name = "Product2", price = 200.0).apply { id = 2L },
+            )
+
+        whenever(productService.getAllProducts()).thenReturn(productList)
+
+        mockMvc.perform(get("/shop/get").param("id", "1"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(productList.size))
+            .andExpect(jsonPath("$[0].id").value(productList[0].id))
+            .andExpect(jsonPath("$[0].name").value(productList[0].name))
+            .andExpect(jsonPath("$[0].price").value(productList[0].price))
+            .andExpect(jsonPath("$[1].id").value(productList[1].id))
+            .andExpect(jsonPath("$[1].name").value(productList[1].name))
+            .andExpect(jsonPath("$[1].price").value(productList[1].price))
+    }
+
+    @Test
+    fun test011GetShopFailure() {
+        whenever(productService.getAllProducts()).thenThrow(RuntimeException("Internal Server Error"))
+
+        mockMvc.perform(get("/shop/get").param("id", "1"))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().string("Internal Server Error"))
     }
 }
