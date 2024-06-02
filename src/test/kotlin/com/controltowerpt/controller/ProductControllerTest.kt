@@ -23,7 +23,7 @@ class ProductControllerTest {
     lateinit var productService: ProductService
 
     @Test
-    fun test001getProductByIdSuccessfully() {
+    fun test001GetProductByIdSuccessfully() {
         val id = 1L
         val name = "Test Product"
         val price = 10.0
@@ -33,7 +33,7 @@ class ProductControllerTest {
                 Product(
                     name = name,
                     price = price,
-                ),
+                ).apply { this.id = id },
             ),
         )
 
@@ -48,13 +48,13 @@ class ProductControllerTest {
     }
 
     @Test
-    fun test002findAllProducts() {
+    fun test002FindAllProducts() {
         whenever(productService.getAllProducts()).thenReturn(
             listOf(
                 Product(
                     name = "Test Product",
                     price = 10.0,
-                ),
+                ).apply { this.id = 1L },
             ),
         )
 
@@ -63,6 +63,48 @@ class ProductControllerTest {
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
-            .andExpect(content().string("[{\"id\":0,\"name\":\"Test Product\",\"price\":10.0}]"))
+            .andExpect(content().string("[{\"id\":1,\"name\":\"Test Product\",\"price\":10.0}]"))
+    }
+
+    @Test
+    fun test003GetProductByIdNotFound() {
+        val id = 1L
+
+        whenever(productService.findProductById(id)).thenReturn(Optional.empty())
+
+        mockMvc.perform(
+            get("/product/getById?id=$id")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(id.toString()),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().string("Product not found"))
+    }
+
+    @Test
+    fun test004GetProductByIdException() {
+        val id = 1L
+
+        whenever(productService.findProductById(id)).thenThrow(RuntimeException("Database error"))
+
+        mockMvc.perform(
+            get("/product/getById?id=$id")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(id.toString()),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().string("Database error"))
+    }
+
+    @Test
+    fun test005GetAllProductsException() {
+        whenever(productService.getAllProducts()).thenThrow(RuntimeException("Database error"))
+
+        mockMvc.perform(
+            get("/product/getAll")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().string("Database error"))
     }
 }
