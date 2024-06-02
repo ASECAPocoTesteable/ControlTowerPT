@@ -181,7 +181,7 @@ class AdminControllerTest {
 
         whenever(productService.getAllProducts()).thenReturn(productList)
 
-        mockMvc.perform(get("/shop/get").param("id", "1"))
+        mockMvc.perform(get("/shop"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.length()").value(productList.size))
@@ -197,7 +197,7 @@ class AdminControllerTest {
     fun test011GetShopFailure() {
         whenever(productService.getAllProducts()).thenThrow(RuntimeException("Internal Server Error"))
 
-        mockMvc.perform(get("/shop/get").param("id", "1"))
+        mockMvc.perform(get("/shop"))
             .andExpect(status().isBadRequest)
             .andExpect(content().string("Internal Server Error"))
     }

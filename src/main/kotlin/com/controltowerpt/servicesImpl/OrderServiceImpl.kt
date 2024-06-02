@@ -3,6 +3,7 @@ package com.controltowerpt.servicesImpl
 import com.controltowerpt.controllers.dto.request.CreateOrderRequest
 import com.controltowerpt.controllers.dto.request.NewDeliveryData
 import com.controltowerpt.controllers.dto.request.ProductQuantity
+import com.controltowerpt.controllers.dto.response.OrderInfoDTO
 import com.controltowerpt.models.Order
 import com.controltowerpt.models.OrderState
 import com.controltowerpt.models.manytomany.ProductOrder
@@ -66,8 +67,10 @@ class OrderServiceImpl(
             }
     }
 
-    override fun getAllOrders(): List<Order> {
-        return orderRepository.findAll()
+    override fun getAllOrders(): List<OrderInfoDTO> {
+        return orderRepository.findAll().map { order ->
+            OrderInfoDTO().apply { fromOrder(order) }
+        }
     }
 
     override fun orderIsReady(orderId: Long): Mono<Boolean> {

@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/shop")
 class AdminController(private val productService: ProductService) {
-    @GetMapping("/get")
-    fun getShop(
-        @RequestParam id: Long,
-    ): ResponseEntity<*> {
+    @GetMapping("")
+    fun getShop(): ResponseEntity<*> {
         return try {
             val shop = productService.getAllProducts()
             val productList =
