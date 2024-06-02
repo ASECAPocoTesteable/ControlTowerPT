@@ -27,7 +27,7 @@ class WarehouseServiceTest {
     }
 
     @Test
-    fun testCheckStockSuccess() {
+    fun test001CheckStockSuccess() {
         val products = listOf(ProductQuantity(productId = 1L, quantity = 2))
 
         val requestBodyUriSpecMock = mock(WebClient.RequestBodyUriSpec::class.java)
@@ -49,7 +49,7 @@ class WarehouseServiceTest {
     }
 
     @Test
-    fun testCheckStockFailure() {
+    fun test002CheckStockFailure() {
         val products = listOf(ProductQuantity(productId = 1L, quantity = 2))
 
         val requestBodyUriSpecMock = mock(WebClient.RequestBodyUriSpec::class.java)
@@ -71,7 +71,7 @@ class WarehouseServiceTest {
     }
 
     @Test
-    fun testGetWarehouseByIDSuccess() {
+    fun test003GetWarehouseByIDSuccess() {
         val warehouse = Warehouse().apply { id = 1L }
         whenever(warehouseRepository.findById(1L)).thenReturn(Optional.of(warehouse))
 
@@ -81,7 +81,7 @@ class WarehouseServiceTest {
     }
 
     @Test
-    fun testGetWarehouseByIDFailure() {
+    fun test004GetWarehouseByIDFailure() {
         whenever(warehouseRepository.findById(1L)).thenReturn(Optional.empty())
 
         val exception =
@@ -90,5 +90,49 @@ class WarehouseServiceTest {
             }
 
         assert(exception.message == "Warehouse with id 1 not found")
+    }
+
+    @Test
+    fun test005OrderHasBeenPickedUpSuccess() {
+        val orderId = 1L
+
+        val requestBodyUriSpecMock = mock(WebClient.RequestBodyUriSpec::class.java)
+        val requestBodySpecMock = mock(WebClient.RequestBodySpec::class.java)
+        val requestHeadersSpecMock = mock(WebClient.RequestHeadersSpec::class.java)
+        val responseSpecMock = mock(WebClient.ResponseSpec::class.java)
+
+        whenever(webClient.put()).thenReturn(requestBodyUriSpecMock)
+        whenever(requestBodyUriSpecMock.uri(any<String>())).thenReturn(requestBodySpecMock)
+        whenever(requestBodySpecMock.bodyValue(any())).thenReturn(requestHeadersSpecMock)
+        whenever(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock)
+        whenever(responseSpecMock.bodyToMono(Boolean::class.java)).thenReturn(Mono.just(true))
+
+        val result = warehouseService.orderHasBeenPickedUp(orderId)
+
+        StepVerifier.create(result)
+            .expectNext(true)
+            .verifyComplete()
+    }
+
+    @Test
+    fun test006OrderHasBeenPickedUpFailure() {
+        val orderId = 1L
+
+        val requestBodyUriSpecMock = mock(WebClient.RequestBodyUriSpec::class.java)
+        val requestBodySpecMock = mock(WebClient.RequestBodySpec::class.java)
+        val requestHeadersSpecMock = mock(WebClient.RequestHeadersSpec::class.java)
+        val responseSpecMock = mock(WebClient.ResponseSpec::class.java)
+
+        whenever(webClient.put()).thenReturn(requestBodyUriSpecMock)
+        whenever(requestBodyUriSpecMock.uri(any<String>())).thenReturn(requestBodySpecMock)
+        whenever(requestBodySpecMock.bodyValue(any())).thenReturn(requestHeadersSpecMock)
+        whenever(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock)
+        whenever(responseSpecMock.bodyToMono(Boolean::class.java)).thenReturn(Mono.error(RuntimeException("Internal Server Error")))
+
+        val result = warehouseService.orderHasBeenPickedUp(orderId)
+
+        StepVerifier.create(result)
+            .expectNext(false)
+            .verifyComplete()
     }
 }

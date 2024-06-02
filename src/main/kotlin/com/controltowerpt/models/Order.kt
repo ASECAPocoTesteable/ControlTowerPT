@@ -35,4 +35,5 @@ enum class OrderState {
     PREPARED,
     IN_DELIVERY,
     DELIVERED,
+    FAILED,
 }

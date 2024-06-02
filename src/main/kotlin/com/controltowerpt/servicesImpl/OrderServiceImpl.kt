@@ -95,7 +95,7 @@ class OrderServiceImpl(
                 deliveryService.initializeDelivery(deliveryData)
                     .flatMap { success ->
                         if (success) {
-                            order.state = OrderState.IN_DELIVERY
+                            order.state = OrderState.PREPARED
                             Mono.fromCallable { orderRepository.save(order) }
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .thenReturn(true)
@@ -104,5 +104,63 @@ class OrderServiceImpl(
                         }
                     }
             }
+    }
+
+    override fun orderHasBeenPicked(orderId: Long): Mono<Boolean> {
+        if (orderId < 1) {
+            return Mono.error(IllegalArgumentException("Order id must be greater than 0"))
+        }
+
+        return Mono.fromCallable {
+            val order =
+                orderRepository.findById(orderId).orElseThrow {
+                    IllegalArgumentException("Order with id $orderId not found")
+                }
+
+            order.state = OrderState.IN_DELIVERY
+            orderRepository.save(order)
+            order.id
+        }
+            .subscribeOn(Schedulers.boundedElastic())
+            .flatMap { savedOrderId ->
+                warehouseService.orderHasBeenPickedUp(savedOrderId)
+                    .flatMap { pickedUpSuccess ->
+                        if (pickedUpSuccess) {
+                            Mono.just(true)
+                        } else {
+                            Mono.error(Exception("Failed to notify warehouse that the order has been picked up"))
+                        }
+                    }
+            }
+    }
+
+    override fun orderDelivered(orderId: Long) {
+        if (orderId < 1) {
+            throw IllegalArgumentException("Order id must be greater than 0")
+        }
+
+        val order =
+            orderRepository.findById(orderId).orElseThrow {
+                IllegalArgumentException("Order with id $orderId not found")
+            }
+
+        order.state = OrderState.DELIVERED
+
+        orderRepository.save(order)
+    }
+
+    override fun orderFailed(orderId: Long) {
+        if (orderId < 1) {
+            throw IllegalArgumentException("Order id must be greater than 0")
+        }
+
+        val order =
+            orderRepository.findById(orderId).orElseThrow {
+                IllegalArgumentException("Order with id $orderId not found")
+            }
+
+        order.state = OrderState.FAILED
+
+        orderRepository.save(order)
     }
 }

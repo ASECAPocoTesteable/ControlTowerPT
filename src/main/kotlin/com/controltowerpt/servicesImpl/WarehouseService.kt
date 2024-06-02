@@ -29,4 +29,15 @@ class WarehouseService(
             IllegalArgumentException("Warehouse with id $id not found")
         }
     }
+
+    fun orderHasBeenPickedUp(orderId: Long): Mono<Boolean> {
+        val url = "http://localhost:8081/warehouse/order/picked-up"
+
+        return webClient.put()
+            .uri(url)
+            .bodyValue(orderId)
+            .retrieve()
+            .bodyToMono(Boolean::class.java)
+            .onErrorResume { Mono.just(false) }
+    }
 }
