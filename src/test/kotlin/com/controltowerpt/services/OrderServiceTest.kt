@@ -343,4 +343,116 @@ class OrderServiceTest {
             }
             .verify()
     }
+
+    @Test
+    fun test015OrderHasBeenPicked() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.PREPARING
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.IN_DELIVERY })
+        whenever(warehouseService.orderHasBeenPickedUp(orderId)).thenReturn(Mono.just(true))
+
+        val result = orderService.orderHasBeenPicked(orderId)
+
+        StepVerifier.create(result)
+            .expectNext(true)
+            .verifyComplete()
+
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository).save(any(Order::class.java))
+        verify(warehouseService).orderHasBeenPickedUp(orderId)
+    }
+
+    @Test
+    fun test016OrderHasBeenPickedFailsToNotifyWarehouse() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.PREPARING
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.IN_DELIVERY })
+        whenever(warehouseService.orderHasBeenPickedUp(orderId)).thenReturn(Mono.just(false))
+
+        val result = orderService.orderHasBeenPicked(orderId)
+
+        StepVerifier.create(result)
+            .expectErrorMatches { it is Exception && it.message == "Failed to notify warehouse that the order has been picked up" }
+            .verify()
+
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository).save(any(Order::class.java))
+        verify(warehouseService).orderHasBeenPickedUp(orderId)
+    }
+
+    @Test
+    fun test017OrderDelivered() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.IN_DELIVERY
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.DELIVERED })
+
+        orderService.orderDelivered(orderId)
+
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test018OrderFailed() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.IN_DELIVERY
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.FAILED })
+
+        orderService.orderFailed(orderId)
+
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test019OrderDeliveredInvalidOrderId() {
+        val orderId = 0L
+
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                orderService.orderDelivered(orderId)
+            }
+
+        assertEquals("Order id must be greater than 0", exception.message)
+        verify(orderRepository, never()).findById(any())
+        verify(orderRepository, never()).save(any())
+    }
+
+    @Test
+    fun test020OrderFailedInvalidOrderId() {
+        val orderId = 0L
+
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                orderService.orderFailed(orderId)
+            }
+
+        assertEquals("Order id must be greater than 0", exception.message)
+        verify(orderRepository, never()).findById(any())
+        verify(orderRepository, never()).save(any())
+    }
 }
