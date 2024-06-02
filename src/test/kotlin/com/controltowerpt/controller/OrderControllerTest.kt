@@ -43,7 +43,7 @@ class OrderControllerTest {
                     ),
             )
 
-        val order = Order(direction = "Test Direction")
+        val order = Order(clientDirection = "Test Direction")
 
         whenever(orderService.createOrder(createOrderRequest)).thenReturn(Mono.just(order))
 
@@ -54,7 +54,7 @@ class OrderControllerTest {
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.direction").isEqualTo("Test Direction")
+            .jsonPath("$.clientDirection").isEqualTo("Test Direction")
     }
 
     @Test
@@ -84,8 +84,8 @@ class OrderControllerTest {
     fun test003GetAllOrdersShouldReturn200AndListOfOrders() {
         val orders =
             listOf(
-                Order(direction = "Order 1"),
-                Order(direction = "Order 2"),
+                Order(clientDirection = "Order 1"),
+                Order(clientDirection = "Order 2"),
             )
 
         whenever(orderService.getAllOrders()).thenReturn(orders)
@@ -94,8 +94,8 @@ class OrderControllerTest {
             .exchange()
             .expectStatus().isOk
             .expectBody()
-            .jsonPath("$[0].direction").isEqualTo("Order 1")
-            .jsonPath("$[1].direction").isEqualTo("Order 2")
+            .jsonPath("$[0].clientDirection").isEqualTo("Order 1")
+            .jsonPath("$[1].clientDirection").isEqualTo("Order 2")
     }
 
     @Test
