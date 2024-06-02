@@ -14,8 +14,8 @@ import lombok.Setter
 @NoArgsConstructor
 @AllArgsConstructor
 class Order(
-    val direction: String = "",
-    val state: OrderState = OrderState.PREPARING,
+    val clientDirection: String = "",
+    var state: OrderState = OrderState.PREPARING,
     @OneToMany(mappedBy = "order", cascade = [CascadeType.ALL], orphanRemoval = true)
     var productOrders: MutableList<ProductOrder> = mutableListOf(),
 ) {
@@ -24,6 +24,10 @@ class Order(
     @Column(nullable = false, unique = true)
     var id:
         Long = 0
+
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id")
+    var warehouse: Warehouse? = null
 }
 
 enum class OrderState {

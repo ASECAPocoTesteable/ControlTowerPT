@@ -1,7 +1,10 @@
 package com.controltowerpt.servicesImpl
 
 import com.controltowerpt.controllers.dto.request.CreateOrderRequest
+import com.controltowerpt.controllers.dto.request.NewDeliveryData
+import com.controltowerpt.controllers.dto.request.ProductQuantity
 import com.controltowerpt.models.Order
+import com.controltowerpt.models.OrderState
 import com.controltowerpt.models.manytomany.ProductOrder
 import com.controltowerpt.repositories.OrderRepository
 import com.controltowerpt.repositories.ProductRepository
@@ -17,6 +20,7 @@ class OrderServiceImpl(
     private val orderRepository: OrderRepository,
     private val productRepository: ProductRepository,
     private val warehouseService: WarehouseService,
+    private val deliveryService: DeliveryService,
 ) : OrderService {
     override fun createOrder(orderCreateDTO: CreateOrderRequest): Mono<Order> {
         if (orderCreateDTO.direction.isEmpty()) {
@@ -43,7 +47,8 @@ class OrderServiceImpl(
                 }
 
                 Mono.defer {
-                    val order = Order(direction = orderCreateDTO.direction)
+                    val warehouseEntity = warehouseService.getWarehouseByID(1L)
+                    val order = Order(clientDirection = orderCreateDTO.direction).apply { warehouse = warehouseEntity }
                     orderCreateDTO.products.forEach { productQuantity ->
                         val productFound =
                             productRepository.findById(productQuantity.productId).orElseThrow {
@@ -63,5 +68,41 @@ class OrderServiceImpl(
 
     override fun getAllOrders(): List<Order> {
         return orderRepository.findAll()
+    }
+
+    override fun orderIsReady(orderId: Long): Mono<Boolean> {
+        if (orderId < 1) {
+            return Mono.error(IllegalArgumentException("Order id must be greater than 0"))
+        }
+
+        return Mono.fromCallable {
+            val order =
+                orderRepository.findById(orderId).orElseThrow {
+                    IllegalArgumentException("Order with id $orderId not found")
+                }
+
+            val newDeliveryData =
+                NewDeliveryData(
+                    orderId,
+                    order.warehouse?.direction ?: throw IllegalArgumentException("Warehouse direction not found"),
+                    order.productOrders.map { ProductQuantity(it.product.id, it.amount) },
+                    order.clientDirection,
+                )
+            order to newDeliveryData
+        }
+            .subscribeOn(Schedulers.boundedElastic())
+            .flatMap { (order, deliveryData) ->
+                deliveryService.initializeDelivery(deliveryData)
+                    .flatMap { success ->
+                        if (success) {
+                            order.state = OrderState.IN_DELIVERY
+                            Mono.fromCallable { orderRepository.save(order) }
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .thenReturn(true)
+                        } else {
+                            Mono.just(false)
+                        }
+                    }
+            }
     }
 }
