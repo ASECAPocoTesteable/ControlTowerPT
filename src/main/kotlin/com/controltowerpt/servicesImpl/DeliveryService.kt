@@ -11,7 +11,7 @@ class DeliveryService(
     @Autowired private val webClient: WebClient,
 ) {
     fun initializeDelivery(deliveryData: NewDeliveryData): Mono<Boolean> {
-        val url = "http://localhost:8082/delivery/order/ready"
+        val url = "http://deliveryapi:8082/delivery/order/ready"
 
         return webClient.post()
             .uri(url)
