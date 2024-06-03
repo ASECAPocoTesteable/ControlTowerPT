@@ -157,7 +157,6 @@ class OrderServiceImpl(
         orderRepository.save(order)
     }
 
-
     override fun orderFailed(orderId: Long) {
         if (orderId < 1) {
             throw IllegalArgumentException("Order id must be greater than 0")

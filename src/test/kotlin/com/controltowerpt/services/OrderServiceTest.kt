@@ -37,10 +37,10 @@ class OrderServiceTest {
             CreateOrderRequest(
                 direction = "Test Direction",
                 products =
-                listOf(
-                    ProductQuantity(productId = 1, quantity = 1),
-                    ProductQuantity(productId = 2, quantity = 2),
-                ),
+                    listOf(
+                        ProductQuantity(productId = 1, quantity = 1),
+                        ProductQuantity(productId = 2, quantity = 2),
+                    ),
             )
 
         val product1 = Product("Product1", 100.0).apply { id = 1L }
@@ -124,10 +124,10 @@ class OrderServiceTest {
             CreateOrderRequest(
                 direction = "Test Direction",
                 products =
-                listOf(
-                    ProductQuantity(productId = 1, quantity = 1),
-                    ProductQuantity(productId = 2, quantity = 2),
-                ),
+                    listOf(
+                        ProductQuantity(productId = 1, quantity = 1),
+                        ProductQuantity(productId = 2, quantity = 2),
+                    ),
             )
 
         val product1 = Product("Product1", 100.0).apply { id = 1L }
@@ -325,7 +325,7 @@ class OrderServiceTest {
         StepVerifier.create(result)
             .expectErrorMatches {
                 it is Exception &&
-                        it.message?.contains("Stock is not sufficient") == true
+                    it.message?.contains("Stock is not sufficient") == true
             }
             .verify()
     }
@@ -339,17 +339,19 @@ class OrderServiceTest {
         StepVerifier.create(result)
             .expectErrorMatches {
                 it is IllegalArgumentException &&
-                        it.message == "Order id must be greater than 0"
+                    it.message == "Order id must be greater than 0"
             }
             .verify()
     }
+
     @Test
     fun test015OrderHasBeenPicked() {
         val orderId = 1L
-        val order = Order(clientDirection = "Client Direction").apply {
-            id = orderId
-            state = OrderState.PREPARED
-        }
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.PREPARED
+            }
 
         whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
         whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
@@ -365,13 +367,14 @@ class OrderServiceTest {
         verify(orderRepository).save(any(Order::class.java))
         verify(warehouseService).orderHasBeenPickedUp(orderId)
     }
+
     @Test
     fun test016OrderHasBeenPickedFailsDueToIncorrectOrderState() {
         val orderId = 1L
         val order =
             Order(clientDirection = "Client Direction").apply {
                 id = orderId
-                state = OrderState.PREPARING  // State not set to PREPARED to trigger IllegalStateException
+                state = OrderState.PREPARING // State not set to PREPARED to trigger IllegalStateException
             }
 
         whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
