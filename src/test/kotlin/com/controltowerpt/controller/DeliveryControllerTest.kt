@@ -65,7 +65,8 @@ class DeliveryControllerTest {
         webTestClient.put().uri("/delivery/completed?orderId=1")
             .exchange()
             .expectStatus().isOk
-            .expectBody().isEmpty
+            .expectBody()
+            .jsonPath("$").isEqualTo("success")
     }
 
     @Test
@@ -86,7 +87,8 @@ class DeliveryControllerTest {
         webTestClient.put().uri("/delivery/failed?orderId=1")
             .exchange()
             .expectStatus().isOk
-            .expectBody().isEmpty
+            .expectBody()
+            .jsonPath("$").isEqualTo("success")
     }
 
     @Test
