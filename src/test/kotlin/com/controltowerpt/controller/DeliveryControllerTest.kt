@@ -55,7 +55,7 @@ class DeliveryControllerTest {
             .expectStatus().isBadRequest
             .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$").isEqualTo("Order id must be greater than 0")
+            .jsonPath("$").isEqualTo("Error: Order id must be greater than 0")
     }
 
     @Test

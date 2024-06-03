@@ -57,7 +57,7 @@ class DeliveryController(private val orderService: OrderService) {
                 Mono.just(
                     ResponseEntity.badRequest()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(e.message),
+                        .body("Error: ${e.message}"),
                 )
             }
     }

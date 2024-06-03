@@ -117,6 +117,10 @@ class OrderServiceImpl(
                     IllegalArgumentException("Order with id $orderId not found")
                 }
 
+            if (order.state != OrderState.PREPARED) {
+                throw IllegalStateException("Order must be in prepared state to be picked")
+            }
+
             order.state = OrderState.IN_DELIVERY
             orderRepository.save(order)
             order.id
@@ -144,10 +148,15 @@ class OrderServiceImpl(
                 IllegalArgumentException("Order with id $orderId not found")
             }
 
+        if (order.state != OrderState.IN_DELIVERY) {
+            throw IllegalStateException("Order must be in delivery state to be delivered")
+        }
+
         order.state = OrderState.DELIVERED
 
         orderRepository.save(order)
     }
+
 
     override fun orderFailed(orderId: Long) {
         if (orderId < 1) {
@@ -158,6 +167,10 @@ class OrderServiceImpl(
             orderRepository.findById(orderId).orElseThrow {
                 IllegalArgumentException("Order with id $orderId not found")
             }
+
+        if (order.state != OrderState.IN_DELIVERY) {
+            throw IllegalStateException("Order must be in delivery state to fail")
+        }
 
         order.state = OrderState.FAILED
 

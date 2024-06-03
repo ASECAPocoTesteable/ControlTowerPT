@@ -19,9 +19,15 @@ class WarehouseService(
         return webClient.post()
             .uri(url)
             .bodyValue(products)
-            .retrieve()
-            .bodyToMono(Boolean::class.java)
-            .onErrorResume { Mono.just(false) }
+            .exchangeToMono { response ->
+                if (response.statusCode().is2xxSuccessful) {
+                    response.bodyToMono(Boolean::class.java)
+                } else {
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error<Boolean>(Exception("Failed to check stock: $errorBody"))
+                    }
+                }
+            }
     }
 
     fun getWarehouseByID(id: Long): Warehouse {
@@ -36,8 +42,14 @@ class WarehouseService(
         return webClient.put()
             .uri(url)
             .bodyValue(orderId)
-            .retrieve()
-            .bodyToMono(Boolean::class.java)
-            .onErrorResume { Mono.just(false) }
+            .exchangeToMono { response ->
+                if (response.statusCode().is2xxSuccessful) {
+                    response.bodyToMono(Boolean::class.java)
+                } else {
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error<Boolean>(Exception("Failed to notify warehouse: $errorBody"))
+                    }
+                }
+            }
     }
 }
