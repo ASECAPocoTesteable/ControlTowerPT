@@ -21,7 +21,7 @@ class OrderController(private val orderService: OrderService) {
     }
 
     @GetMapping("/getAll")
-    fun getAllOrders(): ResponseEntity<*> {
+    fun getAllOrders(): ResponseEntity<Any> {
         return try {
             val orders = orderService.getAllOrders()
             ResponseEntity.ok(orders)

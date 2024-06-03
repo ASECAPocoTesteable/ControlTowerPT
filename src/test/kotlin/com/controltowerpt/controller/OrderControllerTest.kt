@@ -2,6 +2,7 @@ package com.controltowerpt.controllers
 
 import com.controltowerpt.controllers.dto.request.CreateOrderRequest
 import com.controltowerpt.controllers.dto.request.ProductQuantity
+import com.controltowerpt.controllers.dto.response.OrderInfoDTO
 import com.controltowerpt.models.Order
 import com.controltowerpt.services.OrderService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -82,10 +83,10 @@ class OrderControllerTest {
 
     @Test
     fun test003GetAllOrdersShouldReturn200AndListOfOrders() {
-        val orders =
+        val orders: List<OrderInfoDTO> =
             listOf(
-                Order(clientDirection = "Order 1"),
-                Order(clientDirection = "Order 2"),
+                OrderInfoDTO().fromOrder(Order(clientDirection = "Order 1")),
+                OrderInfoDTO().fromOrder(Order(clientDirection = "Order 2")),
             )
 
         whenever(orderService.getAllOrders()).thenReturn(orders)
