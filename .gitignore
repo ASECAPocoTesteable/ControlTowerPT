@@ -2,7 +2,6 @@ HELP.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
-src/main/resources/application.properties
 !**/src/main/**/build/
 !**/src/test/**/build/
 ### STS ###
@@ -17,7 +16,6 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 .env
-src/test/resources/application.properties
 ### IntelliJ IDEA ###
 .idea
 *.iws
