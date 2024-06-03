@@ -31,7 +31,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_HOST}}/${{ secrets.GHCR_REPO }}:latest
+          tags: ghcr.io/gonza69420/controltowerpt:latest
           build-args: |
             PORT=${{ secrets.PORT }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
