@@ -13,16 +13,7 @@ class AdminController(private val productService: ProductService) {
     @GetMapping("")
     fun getShop(): ResponseEntity<*> {
         return try {
-            val shop = productService.getAllProducts()
-            val productList =
-                shop.map { product ->
-                    ProductResDTO(
-                        id = product.id,
-                        name = product.name,
-                        price = product.price,
-                    )
-                }
-            ResponseEntity.ok(productList)
+            ResponseEntity.ok("Esto es una prueba de update")
         } catch (e: Exception) {
             return ResponseEntity.badRequest().body(e.message)
         }
