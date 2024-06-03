@@ -16,8 +16,14 @@ class DeliveryService(
         return webClient.post()
             .uri(url)
             .bodyValue(deliveryData)
-            .retrieve()
-            .bodyToMono(Boolean::class.java)
-            .onErrorResume { Mono.just(false) }
+            .exchangeToMono { response ->
+                if (response.statusCode().is2xxSuccessful) {
+                    response.bodyToMono(Boolean::class.java)
+                } else {
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error<Boolean>(Exception("Failed to initialize delivery: $errorBody"))
+                    }
+                }
+            }
     }
 }

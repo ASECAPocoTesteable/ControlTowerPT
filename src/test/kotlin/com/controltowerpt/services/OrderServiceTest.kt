@@ -350,11 +350,11 @@ class OrderServiceTest {
         val order =
             Order(clientDirection = "Client Direction").apply {
                 id = orderId
-                state = OrderState.PREPARING
+                state = OrderState.PREPARED
             }
 
         whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
-        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.IN_DELIVERY })
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
         whenever(warehouseService.orderHasBeenPickedUp(orderId)).thenReturn(Mono.just(true))
 
         val result = orderService.orderHasBeenPicked(orderId)
@@ -369,45 +369,25 @@ class OrderServiceTest {
     }
 
     @Test
-    fun test016OrderHasBeenPickedFailsToNotifyWarehouse() {
+    fun test016OrderHasBeenPickedFailsDueToIncorrectOrderState() {
         val orderId = 1L
         val order =
             Order(clientDirection = "Client Direction").apply {
                 id = orderId
-                state = OrderState.PREPARING
+                state = OrderState.PREPARING // State not set to PREPARED to trigger IllegalStateException
             }
 
         whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
-        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.IN_DELIVERY })
-        whenever(warehouseService.orderHasBeenPickedUp(orderId)).thenReturn(Mono.just(false))
 
         val result = orderService.orderHasBeenPicked(orderId)
 
         StepVerifier.create(result)
-            .expectErrorMatches { it is Exception && it.message == "Failed to notify warehouse that the order has been picked up" }
+            .expectErrorMatches { it is IllegalStateException && it.message == "Order must be in prepared state to be picked" }
             .verify()
 
         verify(orderRepository).findById(orderId)
-        verify(orderRepository).save(any(Order::class.java))
-        verify(warehouseService).orderHasBeenPickedUp(orderId)
-    }
-
-    @Test
-    fun test017OrderDelivered() {
-        val orderId = 1L
-        val order =
-            Order(clientDirection = "Client Direction").apply {
-                id = orderId
-                state = OrderState.IN_DELIVERY
-            }
-
-        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
-        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.DELIVERED })
-
-        orderService.orderDelivered(orderId)
-
-        verify(orderRepository).findById(orderId)
-        verify(orderRepository).save(any(Order::class.java))
+        verify(orderRepository, never()).save(any(Order::class.java))
+        verify(warehouseService, never()).orderHasBeenPickedUp(orderId)
     }
 
     @Test
@@ -420,7 +400,7 @@ class OrderServiceTest {
             }
 
         whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
-        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order.apply { state = OrderState.FAILED })
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
 
         orderService.orderFailed(orderId)
 
@@ -454,5 +434,42 @@ class OrderServiceTest {
         assertEquals("Order id must be greater than 0", exception.message)
         verify(orderRepository, never()).findById(any())
         verify(orderRepository, never()).save(any())
+    }
+
+    @Test
+    fun test021OrderDeliveredThrowsExceptionWhenOrderNotFound() {
+        val orderId = 1L
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.empty())
+
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                orderService.orderDelivered(orderId)
+            }
+
+        assertEquals("Order with id $orderId not found", exception.message)
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository, never()).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test022OrderDeliveredThrowsExceptionWhenOrderNotInDeliveryState() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.PREPARING
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                orderService.orderDelivered(orderId)
+            }
+
+        assertEquals("Order must be in delivery state to be delivered", exception.message)
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository, never()).save(any(Order::class.java))
     }
 }
