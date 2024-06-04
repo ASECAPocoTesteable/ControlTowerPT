@@ -3,6 +3,7 @@ package com.controltowerpt.services
 import com.controltowerpt.models.Product
 import com.controltowerpt.repositories.ProductRepository
 import com.controltowerpt.servicesImpl.ProductServiceImpl
+import com.controltowerpt.servicesImpl.WarehouseService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -13,8 +14,9 @@ import org.mockito.kotlin.whenever
 
 class ProductServiceTest {
     private val productRep: ProductRepository = mock()
+    private val warehouseService: WarehouseService = mock()
 
-    private val productService: ProductService = ProductServiceImpl(productRep)
+    private val productService: ProductService = ProductServiceImpl(productRep, warehouseService)
 
     @Test
     fun test001createProduct() {
