@@ -1,6 +1,7 @@
 package com.controltowerpt.servicesImpl
 
 import com.controltowerpt.controllers.dto.request.ProductQuantity
+import com.controltowerpt.controllers.dto.request.ProductWarehouseDTO
 import com.controltowerpt.models.Warehouse
 import com.controltowerpt.repositories.WarehouseRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,7 +15,7 @@ class WarehouseService(
     private val warehouseRepository: WarehouseRepository,
 ) {
     fun checkStock(products: List<ProductQuantity>): Mono<Boolean> {
-        val url = "http://warehouseapi:8081/warehouse/stock/check"
+        val url = "http://warehouseapi:8081/stock/check"
 
         return webClient.post()
             .uri(url)
@@ -48,6 +49,27 @@ class WarehouseService(
                 } else {
                     response.bodyToMono(String::class.java).flatMap { errorBody ->
                         Mono.error<Boolean>(Exception("Failed to notify warehouse: $errorBody"))
+                    }
+                }
+            }
+    }
+
+    fun createProduct(
+        id: Long,
+        name: String,
+        stockQuantity: Int,
+    ): Mono<Boolean> {
+        val url = "http://warehouseapi:8081/product/add"
+
+        return webClient.post()
+            .uri(url)
+            .bodyValue(ProductWarehouseDTO(id, name, stockQuantity))
+            .exchangeToMono { response ->
+                if (response.statusCode().is2xxSuccessful) {
+                    response.bodyToMono(Boolean::class.java)
+                } else {
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error<Boolean>(Exception("Failed to create product: $errorBody"))
                     }
                 }
             }

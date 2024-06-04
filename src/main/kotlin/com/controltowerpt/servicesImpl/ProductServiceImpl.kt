@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import java.util.Optional
 
 @Service
-class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService {
+class ProductServiceImpl(private val productRepository: ProductRepository, private val warehouseSerive: WarehouseService) : ProductService {
     override fun createProduct(
         name: String,
         price: Double,
@@ -19,6 +19,7 @@ class ProductServiceImpl(private val productRepository: ProductRepository) : Pro
             throw IllegalArgumentException("Product price must be greater than 0")
         }
         val product = Product(name = name, price = price)
+        warehouseSerive.createProduct(product.id, product.name, 0)
         return productRepository.save(product)
     }
 
