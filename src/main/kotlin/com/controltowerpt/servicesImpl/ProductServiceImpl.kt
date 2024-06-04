@@ -4,6 +4,7 @@ import com.controltowerpt.models.Product
 import com.controltowerpt.repositories.ProductRepository
 import com.controltowerpt.services.ProductService
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import java.util.Optional
 
 @Service
@@ -11,7 +12,7 @@ class ProductServiceImpl(private val productRepository: ProductRepository, priva
     override fun createProduct(
         name: String,
         price: Double,
-    ): Product {
+    ): Mono<Product> {
         if (name.isEmpty()) {
             throw IllegalArgumentException("Product name cannot be empty")
         }
@@ -19,8 +20,10 @@ class ProductServiceImpl(private val productRepository: ProductRepository, priva
             throw IllegalArgumentException("Product price must be greater than 0")
         }
         val product = Product(name = name, price = price)
-        warehouseSerive.createProduct(product.id, product.name, 0)
-        return productRepository.save(product)
+        return warehouseSerive.createProduct(product.id, product.name, 0)
+            .flatMap {
+                Mono.just(productRepository.save(product))
+            }
     }
 
     override fun findProductById(id: Long): Optional<Product> {
