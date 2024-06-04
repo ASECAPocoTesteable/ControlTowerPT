@@ -6,6 +6,7 @@ import com.controltowerpt.controllers.dto.response.ProductResDTO
 import com.controltowerpt.services.ProductService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/shop")
@@ -31,19 +32,26 @@ class AdminController(private val productService: ProductService) {
     @PostMapping("/product/add")
     fun createProduct(
         @RequestBody req: SaveProductDTO,
-    ): ResponseEntity<*> {
-        return try {
-            val product = productService.createProduct(req.name, req.price)
-            ResponseEntity.ok(
-                ProductResDTO(
-                    id = product.id,
-                    name = product.name,
-                    price = product.price,
+    ): Mono<ResponseEntity<ProductResDTO>> {
+        return productService.createProduct(req.name, req.price)
+            .map { product ->
+                ResponseEntity.ok(
+                    ProductResDTO(
+                        id = product.id,
+                        name = product.name,
+                        price = product.price,
+                    ),
+                )
+            }
+            .onErrorReturn(
+                ResponseEntity.badRequest().body(
+                    ProductResDTO(
+                        id = -1,
+                        name = "Error",
+                        price = 0.0,
+                    ),
                 ),
             )
-        } catch (e: Exception) {
-            ResponseEntity.badRequest().body(e.message)
-        }
     }
 
     @DeleteMapping("/delete/product")
