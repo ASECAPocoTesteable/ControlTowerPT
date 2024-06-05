@@ -44,9 +44,7 @@ class DeliveryController(private val orderService: OrderService) {
         return orderService.orderHasBeenPicked(orderId)
             .map { success ->
                 if (success) {
-                    ResponseEntity.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body("Order has been picked successfully.")
+                    ResponseEntity.ok("success")
                 } else {
                     ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .contentType(MediaType.APPLICATION_JSON)
