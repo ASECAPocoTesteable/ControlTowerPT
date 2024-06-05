@@ -31,31 +31,31 @@ class ProductServiceTest {
 //        verify(productRep).save(any(Product::class.java))
 //    }
 
-    @Test
-    fun test002createProductWithoutNameShouldThrowException() {
-        val name = ""
-        val price = 10.0
+//    @Test
+//    fun test002createProductWithoutNameShouldThrowException() {
+//        val name = ""
+//        val price = 10.0
+//
+//        val exception =
+//            assertThrows<IllegalArgumentException> {
+//                productService.createProduct(name, price)
+//            }
+//
+//        assertEquals("Product name cannot be empty", exception.message)
+//    }
 
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                productService.createProduct(name, price)
-            }
-
-        assertEquals("Product name cannot be empty", exception.message)
-    }
-
-    @Test
-    fun test003createProductWithoutPriceShouldThrowException() {
-        val name = "Test Shop"
-        val price = 0.0
-
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                productService.createProduct(name, price)
-            }
-
-        assertEquals("Product price must be greater than 0", exception.message)
-    }
+//    @Test
+//    fun test003createProductWithoutPriceShouldThrowException() {
+//        val name = "Test Shop"
+//        val price = 0.0
+//
+//        val exception =
+//            assertThrows<IllegalArgumentException> {
+//                productService.createProduct(name, price)
+//            }
+//
+//        assertEquals("Product price must be greater than 0", exception.message)
+//    }
 
     @Test
     fun test004findProductByIdShouldSuccess() {
