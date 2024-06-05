@@ -1,5 +1,7 @@
 package com.controltowerpt.servicesImpl
 
+import ProductStock
+import ProductStockRequestDto
 import com.controltowerpt.controllers.dto.request.ProductQuantity
 import com.controltowerpt.controllers.dto.request.ProductWarehouseDTO
 import com.controltowerpt.models.Warehouse
@@ -17,9 +19,15 @@ class WarehouseService(
     fun checkStock(products: List<ProductQuantity>): Mono<Boolean> {
         val url = "http://warehouseapi:8081/order/create"
 
+        // Wrap the list in a ProductStockRequestDto
+        val requestDto =
+            ProductStockRequestDto(
+                productList = products.map { ProductStock(it.productId, it.quantity) },
+            )
+
         return webClient.post()
             .uri(url)
-            .bodyValue(products)
+            .bodyValue(requestDto)
             .exchangeToMono { response ->
                 if (response.statusCode().is2xxSuccessful) {
                     response.bodyToMono(Boolean::class.java)

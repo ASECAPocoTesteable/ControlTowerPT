@@ -1,6 +1,7 @@
 package com.controltowerpt.controllers
 
 import com.controltowerpt.controllers.dto.request.CreateOrderRequest
+import com.controltowerpt.controllers.dto.response.OrderInfoDTO
 import com.controltowerpt.services.OrderService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,7 +15,10 @@ class OrderController(private val orderService: OrderService) {
         @RequestBody req: CreateOrderRequest,
     ): Mono<ResponseEntity<Any>> {
         return orderService.createOrder(req)
-            .map { order -> ResponseEntity.ok(order) as ResponseEntity<Any> }
+            .map { order ->
+                val orderInfoDTO = OrderInfoDTO().fromOrder(order)
+                ResponseEntity.ok(orderInfoDTO) as ResponseEntity<Any>
+            }
             .onErrorResume { e ->
                 Mono.just(ResponseEntity.badRequest().body(mapOf("error" to e.message)))
             }
