@@ -25,6 +25,7 @@ class ProductServiceImpl(
         }
         val product = Product(name = name, price = price)
         return warehouseService.createProduct(product.id, product.name, 0)
+            .doOnError { e -> println("Error: ${e.message}") } // print the error message if an error occurs
             .flatMap {
                 Mono.fromCallable {
                     productRepository.save(product)
