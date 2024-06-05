@@ -45,20 +45,15 @@ class WarehouseService(
         }
     }
 
-    fun orderHasBeenPickedUp(orderId: Long): Mono<Boolean> {
-        val url = "http://warehouseapi:8081/warehouse/order/picked-up"
+    fun orderHasBeenPickedUp(orderId: Long): Mono<String> {
+        val url = "http://warehouseapi:8081/order/picked-up/$orderId"
 
         return webClient.put()
             .uri(url)
-            .bodyValue(orderId)
-            .exchangeToMono { response ->
-                if (response.statusCode().is2xxSuccessful) {
-                    response.bodyToMono(Boolean::class.java)
-                } else {
-                    response.bodyToMono(String::class.java).flatMap { errorBody ->
-                        Mono.error<Boolean>(Exception("Failed to notify warehouse: $errorBody"))
-                    }
-                }
+            .retrieve()
+            .bodyToMono(String::class.java)
+            .onErrorResume { throwable ->
+                Mono.error(Exception("Failed to notify picked up: ${throwable.message}", throwable))
             }
     }
 
