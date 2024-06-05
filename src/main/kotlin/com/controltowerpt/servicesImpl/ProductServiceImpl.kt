@@ -23,15 +23,23 @@ class ProductServiceImpl(
         if (price <= 0) {
             return Mono.error(IllegalArgumentException("Product price must be greater than 0"))
         }
-        val product = Product(name = name, price = price)
-        return warehouseService.createProduct(product.id, product.name, 0)
-            .doOnError { e -> println("Error: ${e.message}") } // print the error message if an error occurs
-            .flatMap {
-                Mono.fromCallable {
-                    productRepository.save(product)
-                }.subscribeOn(Schedulers.boundedElastic())
+
+        return Mono.fromCallable {
+            val product = Product(name = name, price = price)
+            productRepository.save(product)
+        }
+            .subscribeOn(Schedulers.boundedElastic())
+            .flatMap { savedProduct ->
+                warehouseService.createProduct(savedProduct.id, savedProduct.name, 0)
+                    .flatMap {
+                        Mono.just(savedProduct)
+                    }
+                    .doOnError {
+                        Mono.fromCallable { productRepository.deleteById(savedProduct.id) }
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .subscribe()
+                    }
             }
-            .map { product }
     }
 
     override fun findProductById(id: Long): Optional<Product> {
