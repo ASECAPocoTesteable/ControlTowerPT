@@ -15,7 +15,7 @@ class WarehouseService(
     private val warehouseRepository: WarehouseRepository,
 ) {
     fun checkStock(products: List<ProductQuantity>): Mono<Boolean> {
-        val url = "http://warehouseapi:8081/stock/check"
+        val url = "http://warehouseapi:8081/order/create"
 
         return webClient.post()
             .uri(url)
