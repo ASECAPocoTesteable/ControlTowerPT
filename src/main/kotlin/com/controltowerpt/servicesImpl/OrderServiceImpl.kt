@@ -149,7 +149,7 @@ class OrderServiceImpl(
             .flatMap { savedOrderId ->
                 warehouseService.orderHasBeenPickedUp(savedOrderId)
                     .flatMap { pickedUpSuccess ->
-                        if (pickedUpSuccess) {
+                        if (pickedUpSuccess == "success") {
                             Mono.just(true)
                         } else {
                             Mono.error(Exception("Failed to notify warehouse that the order has been picked up"))
