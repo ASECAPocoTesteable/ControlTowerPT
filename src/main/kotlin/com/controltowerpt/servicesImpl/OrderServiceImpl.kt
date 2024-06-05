@@ -90,20 +90,27 @@ class OrderServiceImpl(
         }
             .subscribeOn(Schedulers.boundedElastic()) // Offload to bounded elastic scheduler
             .flatMap { (order, orderProductOrders) ->
+                val warehouseDirection =
+                    order.warehouse?.direction ?: return@flatMap Mono.error<Boolean>(
+                        IllegalArgumentException("Warehouse direction not found"),
+                    )
                 val newDeliveryData =
                     NewDeliveryData(
                         orderId,
-                        order.warehouse?.direction ?: return@flatMap Mono.error(IllegalArgumentException("Warehouse direction not found")),
+                        warehouseDirection,
                         orderProductOrders.map { ProductQuantityDTO(it.product.name, it.amount) },
                         order.clientDirection,
                     )
+
+                if (order.state != OrderState.PREPARING) {
+                    return@flatMap Mono.error<Boolean>(IllegalStateException("Order must be in pending state to be prepared"))
+                }
+
                 deliveryService.initializeDelivery(newDeliveryData)
                     .flatMap { success ->
                         if (success) {
                             order.state = OrderState.PREPARED
-                            Mono.fromCallable {
-                                orderRepository.save(order)
-                            }
+                            Mono.fromCallable { orderRepository.save(order) }
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .thenReturn(true)
                                 .doOnSuccess { println("Order state updated successfully") } // Add logging for success
@@ -114,6 +121,7 @@ class OrderServiceImpl(
                     }
             }
             .onErrorResume { throwable ->
+                println("Failed to process order readiness: ${throwable.message}") // Add logging for error
                 Mono.error(Exception("Failed to process order readiness: ${throwable.message}", throwable))
             }
     }

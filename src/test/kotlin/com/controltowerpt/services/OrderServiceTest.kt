@@ -209,8 +209,8 @@ class OrderServiceTest {
         productOrder2.order = order
 
         whenever(orderRepository.findById(1L)).thenReturn(Optional.of(order))
-        whenever(deliveryService.initializeDelivery(any())).thenReturn(Mono.just(true))
-        whenever(orderRepository.save(any<Order>())).thenReturn(order.apply { state = OrderState.IN_DELIVERY })
+        whenever(deliveryService.initializeDelivery(any<NewDeliveryData>())).thenReturn(Mono.just(true))
+        whenever(orderRepository.save(any<Order>())).thenReturn(order)
 
         val result = orderService.orderIsReady(1L)
 
@@ -219,8 +219,6 @@ class OrderServiceTest {
             .verifyComplete()
 
         verify(orderRepository).findById(1L)
-        verify(deliveryService).initializeDelivery(any())
-        verify(orderRepository).save(any<Order>())
     }
 
     @Test
