@@ -5,25 +5,32 @@ import com.controltowerpt.repositories.ProductRepository
 import com.controltowerpt.services.ProductService
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import java.util.Optional
 
 @Service
-class ProductServiceImpl(private val productRepository: ProductRepository, private val warehouseSerive: WarehouseService) : ProductService {
+class ProductServiceImpl(
+    private val productRepository: ProductRepository,
+    private val warehouseService: WarehouseService,
+) : ProductService {
     override fun createProduct(
         name: String,
         price: Double,
     ): Mono<Product> {
         if (name.isEmpty()) {
-            throw IllegalArgumentException("Product name cannot be empty")
+            return Mono.error(IllegalArgumentException("Product name cannot be empty"))
         }
         if (price <= 0) {
-            throw IllegalArgumentException("Product price must be greater than 0")
+            return Mono.error(IllegalArgumentException("Product price must be greater than 0"))
         }
         val product = Product(name = name, price = price)
-        return warehouseSerive.createProduct(product.id, product.name, 0)
+        return warehouseService.createProduct(product.id, product.name, 0)
             .flatMap {
-                Mono.just(productRepository.save(product))
+                Mono.fromCallable {
+                    productRepository.save(product)
+                }.subscribeOn(Schedulers.boundedElastic())
             }
+            .map { product }
     }
 
     override fun findProductById(id: Long): Optional<Product> {
