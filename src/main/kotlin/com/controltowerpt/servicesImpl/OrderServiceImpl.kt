@@ -2,12 +2,13 @@ package com.controltowerpt.servicesImpl
 
 import com.controltowerpt.controllers.dto.request.CreateOrderRequest
 import com.controltowerpt.controllers.dto.request.NewDeliveryData
-import com.controltowerpt.controllers.dto.request.ProductQuantity
+import com.controltowerpt.controllers.dto.request.ProductQuantityDTO
 import com.controltowerpt.controllers.dto.response.OrderInfoDTO
 import com.controltowerpt.models.Order
 import com.controltowerpt.models.OrderState
 import com.controltowerpt.models.manytomany.ProductOrder
 import com.controltowerpt.repositories.OrderRepository
+import com.controltowerpt.repositories.ProductOrderRepository
 import com.controltowerpt.repositories.ProductRepository
 import com.controltowerpt.services.OrderService
 import org.springframework.stereotype.Service
@@ -22,6 +23,7 @@ class OrderServiceImpl(
     private val productRepository: ProductRepository,
     private val warehouseService: WarehouseService,
     private val deliveryService: DeliveryService,
+    private val productOrderRepository: ProductOrderRepository,
 ) : OrderService {
     override fun createOrder(orderCreateDTO: CreateOrderRequest): Mono<Order> {
         if (orderCreateDTO.direction.isEmpty()) {
@@ -83,29 +85,36 @@ class OrderServiceImpl(
                 orderRepository.findById(orderId).orElseThrow {
                     IllegalArgumentException("Order with id $orderId not found")
                 }
-
-            val newDeliveryData =
-                NewDeliveryData(
-                    orderId,
-                    order.warehouse?.direction ?: throw IllegalArgumentException("Warehouse direction not found"),
-                    order.productOrders.map { ProductQuantity(it.product.id, it.amount) },
-                    order.clientDirection,
-                )
-            order to newDeliveryData
+            val orderProductOrders = productOrderRepository.findByOrderId(orderId)
+            order to orderProductOrders
         }
-            .subscribeOn(Schedulers.boundedElastic())
-            .flatMap { (order, deliveryData) ->
-                deliveryService.initializeDelivery(deliveryData)
+            .subscribeOn(Schedulers.boundedElastic()) // Offload to bounded elastic scheduler
+            .flatMap { (order, orderProductOrders) ->
+                val newDeliveryData =
+                    NewDeliveryData(
+                        orderId,
+                        order.warehouse?.direction ?: return@flatMap Mono.error(IllegalArgumentException("Warehouse direction not found")),
+                        orderProductOrders.map { ProductQuantityDTO(it.product.name, it.amount) },
+                        order.clientDirection,
+                    )
+                deliveryService.initializeDelivery(newDeliveryData)
                     .flatMap { success ->
                         if (success) {
                             order.state = OrderState.PREPARED
-                            Mono.fromCallable { orderRepository.save(order) }
+                            Mono.fromCallable {
+                                orderRepository.save(order)
+                            }
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .thenReturn(true)
+                                .doOnSuccess { println("Order state updated successfully") } // Add logging for success
+                                .doOnError { e -> println("Error updating order state: ${e.message}") } // Add logging for error
                         } else {
                             Mono.just(false)
                         }
                     }
+            }
+            .onErrorResume { throwable ->
+                Mono.error(Exception("Failed to process order readiness: ${throwable.message}", throwable))
             }
     }
 

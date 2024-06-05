@@ -1,5 +1,5 @@
 import com.controltowerpt.controllers.dto.request.NewDeliveryData
-import com.controltowerpt.controllers.dto.request.ProductQuantity
+import com.controltowerpt.controllers.dto.request.ProductQuantityDTO
 import com.controltowerpt.servicesImpl.DeliveryService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +28,7 @@ class DeliveryServiceTest {
             NewDeliveryData(
                 orderId = 1L,
                 warehouseDirection = "Warehouse Direction",
-                products = listOf(ProductQuantity(productId = 1L, quantity = 2)),
+                products = listOf(ProductQuantityDTO(product = "caca", quantity = 2)),
                 customerDirection = "Customer Direction",
             )
 
@@ -56,7 +56,7 @@ class DeliveryServiceTest {
             NewDeliveryData(
                 orderId = 1L,
                 warehouseDirection = "Warehouse Direction",
-                products = listOf(ProductQuantity(productId = 1L, quantity = 2)),
+                products = listOf(ProductQuantityDTO(product = "caca", quantity = 2)),
                 customerDirection = "Customer Direction",
             )
 

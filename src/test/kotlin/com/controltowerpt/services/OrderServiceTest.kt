@@ -9,6 +9,7 @@ import com.controltowerpt.models.Product
 import com.controltowerpt.models.Warehouse
 import com.controltowerpt.models.manytomany.ProductOrder
 import com.controltowerpt.repositories.OrderRepository
+import com.controltowerpt.repositories.ProductOrderRepository
 import com.controltowerpt.repositories.ProductRepository
 import com.controltowerpt.servicesImpl.DeliveryService
 import com.controltowerpt.servicesImpl.OrderServiceImpl
@@ -29,7 +30,9 @@ class OrderServiceTest {
     private val orderRepository: OrderRepository = mock(OrderRepository::class.java)
     private val warehouseService: WarehouseService = mock(WarehouseService::class.java)
     private var deliveryService: DeliveryService = mock(DeliveryService::class.java)
-    private var orderService: OrderService = OrderServiceImpl(orderRepository, productRepository, warehouseService, deliveryService)
+    private val productOrderRepository: ProductOrderRepository = mock(ProductOrderRepository::class.java)
+    private var orderService: OrderService =
+        OrderServiceImpl(orderRepository, productRepository, warehouseService, deliveryService, productOrderRepository)
 
     @Test
     fun test001CreateOrderSuccessfully() {
@@ -256,13 +259,16 @@ class OrderServiceTest {
     }
 
     @Test
-    fun test008OrderIsReadyShouldReturnErrorWhenOrderIsNotFound() {
+    fun testOrderIsReadyShouldReturnErrorWhenOrderIsNotFound() {
+        // Arrange
         whenever(orderRepository.findById(1L)).thenReturn(Optional.empty())
 
+        // Act
         val result = orderService.orderIsReady(1L)
 
+        // Assert
         StepVerifier.create(result)
-            .expectErrorMatches { it is IllegalArgumentException && it.message == "Order with id 1 not found" }
+            .expectErrorMatches { it is Exception && it.message == "Failed to process order readiness: Order with id 1 not found" }
             .verify()
 
         verify(orderRepository).findById(1L)

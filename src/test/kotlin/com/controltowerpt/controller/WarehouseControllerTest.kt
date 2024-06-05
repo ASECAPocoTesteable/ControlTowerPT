@@ -24,7 +24,7 @@ class WarehouseControllerTest {
     fun test001OrderReadySuccess() {
         whenever(orderService.orderIsReady(any())).thenReturn(Mono.just(true))
 
-        webTestClient.put().uri("/warehouse/order/ready?orderId=1")
+        webTestClient.put().uri("/warehouse/order/ready/1")
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
@@ -36,7 +36,7 @@ class WarehouseControllerTest {
     fun test002OrderReadyFailure() {
         whenever(orderService.orderIsReady(any())).thenReturn(Mono.just(false))
 
-        webTestClient.put().uri("/warehouse/order/ready?orderId=1")
+        webTestClient.put().uri("/warehouse/order/ready/1")
             .exchange()
             .expectStatus().isEqualTo(503)
             .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
@@ -48,7 +48,7 @@ class WarehouseControllerTest {
     fun test003OrderReadyError() {
         whenever(orderService.orderIsReady(any())).thenReturn(Mono.error(RuntimeException("Order id must be greater than 0")))
 
-        webTestClient.put().uri("/warehouse/order/ready?orderId=0")
+        webTestClient.put().uri("/warehouse/order/ready/0")
             .exchange()
             .expectStatus().isBadRequest
             .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
