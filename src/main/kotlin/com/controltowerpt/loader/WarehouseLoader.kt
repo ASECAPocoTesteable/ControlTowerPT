@@ -12,7 +12,7 @@ class WarehouseLoader(private val warehouseRepository: WarehouseRepository) : Co
     }
 
     private fun createWarehouse() {
-        if (warehouseRepository.findAll().isEmpty()) {
+        if (warehouseRepository.findById(1).isEmpty) {
             val warehouse = Warehouse()
             warehouse.direction = "Avenida simpatica de tuquito 123"
             warehouseRepository.save(warehouse)
