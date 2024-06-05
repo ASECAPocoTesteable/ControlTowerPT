@@ -361,7 +361,7 @@ class OrderServiceTest {
 
         whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
         whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
-        whenever(warehouseService.orderHasBeenPickedUp(orderId)).thenReturn(Mono.just(true))
+        whenever(warehouseService.orderHasBeenPickedUp(orderId)).thenReturn(Mono.just("success"))
 
         val result = orderService.orderHasBeenPicked(orderId)
 
