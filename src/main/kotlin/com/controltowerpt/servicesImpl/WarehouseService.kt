@@ -58,7 +58,7 @@ class WarehouseService(
         id: Long,
         name: String,
         stockQuantity: Int,
-    ): Mono<Boolean> {
+    ): Mono<String> {
         val url = "http://warehouseapi:8081/product/add"
 
         return webClient.post()
@@ -66,10 +66,10 @@ class WarehouseService(
             .bodyValue(ProductWarehouseDTO(id, name, stockQuantity))
             .exchangeToMono { response ->
                 if (response.statusCode().is2xxSuccessful) {
-                    response.bodyToMono(Boolean::class.java)
+                    response.bodyToMono(String::class.java)
                 } else {
                     response.bodyToMono(String::class.java).flatMap { errorBody ->
-                        Mono.error<Boolean>(Exception("Failed to create product: $errorBody"))
+                        Mono.error<String>(Exception("Failed to create product: $errorBody"))
                     }
                 }
             }
