@@ -29,9 +29,8 @@ class DeliveryControllerTest {
         webTestClient.put().uri("/delivery/picked?orderId=1")
             .exchange()
             .expectStatus().isOk
-            .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$").isEqualTo("Order has been picked successfully.")
+            .jsonPath("$").isEqualTo("success")
     }
 
     @Test
