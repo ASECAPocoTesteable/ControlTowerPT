@@ -137,7 +137,7 @@ class OrderServiceImpl(
                     IllegalArgumentException("Order with id $orderId not found")
                 }
 
-            if (order.state != OrderState.PREPARED) {
+            if (!listOf(OrderState.FAILED, OrderState.PREPARED).contains(order.state)) {
                 throw IllegalStateException("Order must be in prepared state to be picked")
             }
 

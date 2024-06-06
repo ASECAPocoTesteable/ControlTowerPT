@@ -12,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import reactor.core.publisher.Mono
 
 @WebMvcTest(AdminController::class)
 class AdminControllerTest {
@@ -21,31 +22,29 @@ class AdminControllerTest {
     @MockBean
     lateinit var productService: ProductService
 
-//    @Test
-//    fun test001createProductSuccessfully() {
-//        val name = "Test Product"
-//        val price = 10.0
-//        val jsonBody = """{"name": "$name", "price": $price}"""
-//
-//        whenever(productService.createProduct(name, price)).thenReturn(
-//            Mono.just(
-//                Product(
-//                    name = name,
-//                    price = price,
-//                ),
-//            ),
-//        )
-//
-//        mockMvc.perform(
-//            post("/shop/product/add")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(jsonBody),
-//        )
-//            .andExpect(status().isOk)
-//            .andExpect(jsonPath("$.name").value(name))
-//            .andExpect(jsonPath("$.price").value(price))
-//    }
-//
+    @Test
+    fun test001createProductSuccessfully() {
+        val name = "Test Product"
+        val price = 10.0
+        val jsonBody = """{"name": "$name", "price": $price}"""
+
+        whenever(productService.createProduct(name, price)).thenReturn(
+            Mono.just(
+                Product(
+                    name = name,
+                    price = price,
+                ),
+            ),
+        )
+
+        mockMvc.perform(
+            post("/shop/product/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody),
+        )
+            .andExpect(status().isOk)
+    }
+
 //    @Test
 //    fun test002createProductWithEmptyName() {
 //        val name = ""
