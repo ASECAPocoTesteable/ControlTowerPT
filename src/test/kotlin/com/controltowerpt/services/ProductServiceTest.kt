@@ -11,6 +11,7 @@ import org.mockito.Mockito.*
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import reactor.core.publisher.Mono
 
 class ProductServiceTest {
     private val productRep: ProductRepository = mock()
@@ -18,44 +19,45 @@ class ProductServiceTest {
 
     private val productService: ProductService = ProductServiceImpl(productRep, warehouseService)
 
-//    @Test
-//    fun test001createProduct() {
-//        val name = "Test Shop"
-//        val price = 10.0
-//        val product = Product(name = "Test Product", price = 10.0)
-//
-//        whenever(productRep.save(any(Product::class.java))).thenReturn(product)
-//
-//        productService.createProduct(name, price)
-//
-//        verify(productRep).save(any(Product::class.java))
-//    }
+    @Test
+    fun test001createProduct() {
+        val name = "Test Shop"
+        val price = 10.0
+        val product = Product(name = "Test Product", price = 10.0)
 
-//    @Test
-//    fun test002createProductWithoutNameShouldThrowException() {
-//        val name = ""
-//        val price = 10.0
-//
-//        val exception =
-//            assertThrows<IllegalArgumentException> {
-//                productService.createProduct(name, price)
-//            }
-//
-//        assertEquals("Product name cannot be empty", exception.message)
-//    }
+        whenever(productRep.save(any(Product::class.java))).thenReturn(product)
+        whenever(warehouseService.createProduct(product.id, product.name, 0)).thenReturn(Mono.just("Success"))
 
-//    @Test
-//    fun test003createProductWithoutPriceShouldThrowException() {
-//        val name = "Test Shop"
-//        val price = 0.0
-//
-//        val exception =
-//            assertThrows<IllegalArgumentException> {
-//                productService.createProduct(name, price)
-//            }
-//
-//        assertEquals("Product price must be greater than 0", exception.message)
-//    }
+        productService.createProduct(name, price).block()
+
+        verify(productRep).save(any(Product::class.java))
+    }
+
+    @Test
+    fun test002createProductWithoutNameShouldThrowException() {
+        val name = ""
+        val price = 10.0
+
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                productService.createProduct(name, price).block()
+            }
+
+        assertEquals("Product name cannot be empty", exception.message)
+    }
+
+    @Test
+    fun test003createProductWithoutPriceShouldThrowException() {
+        val name = "Test Shop"
+        val price = 0.0
+
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                productService.createProduct(name, price).block()
+            }
+
+        assertEquals("Product price must be greater than 0", exception.message)
+    }
 
     @Test
     fun test004findProductByIdShouldSuccess() {

@@ -11,9 +11,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.whenever
 
-
 class WarehouseLoaderTest {
-
     @Mock
     private lateinit var warehouseRepository: WarehouseRepository
 
@@ -35,7 +33,7 @@ class WarehouseLoaderTest {
     }
 
     @Test
-    fun test002RunLoaderSuccessful(){
+    fun test002RunLoaderSuccessful() {
         whenever(warehouseRepository.findAll()).thenReturn(listOf())
         warehouseLoader.run()
         Mockito.verify(warehouseRepository).save(Mockito.any(Warehouse::class.java))

@@ -13,16 +13,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 @DataJpaTest
 class ProductOrderRepositoryTest {
     @Autowired
-    lateinit var entityManager : TestEntityManager
+    lateinit var entityManager: TestEntityManager
 
     @Autowired
-    lateinit var productOrderRepository : ProductOrderRepository
+    lateinit var productOrderRepository: ProductOrderRepository
 
     @AfterEach
     fun cleanUp() {
         productOrderRepository.deleteAll()
     }
-
 
     @Test
     fun test001findOrderByIdSuccess() {
