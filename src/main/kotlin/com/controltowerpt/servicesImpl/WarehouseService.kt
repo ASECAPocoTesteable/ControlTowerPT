@@ -50,10 +50,15 @@ class WarehouseService(
 
         return webClient.put()
             .uri(url)
-            .retrieve()
-            .bodyToMono(String::class.java)
-            .onErrorResume { throwable ->
-                Mono.error(Exception("Failed to notify picked up: ${throwable.message}", throwable))
+            .bodyValue("")
+            .exchangeToMono { response ->
+                if (response.statusCode().is2xxSuccessful) {
+                    response.bodyToMono(String::class.java)
+                } else {
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error<String>(Exception("Failed to mark order as picked up: $errorBody"))
+                    }
+                }
             }
     }
 

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -18,6 +19,9 @@ import reactor.core.publisher.Mono
 class AdminControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc
+
+    @Autowired
+    private lateinit var webTestClient: WebTestClient
 
     @MockBean
     lateinit var productService: ProductService
@@ -45,38 +49,39 @@ class AdminControllerTest {
             .andExpect(status().isOk)
     }
 
-//    @Test
-//    fun test002createProductWithEmptyName() {
-//        val name = ""
-//        val price = 10.0
-//        val jsonBody = """{"name": "$name", "price": $price}"""
-//
-//        whenever(productService.createProduct(name, price)).thenThrow(IllegalArgumentException("Product name cannot be empty"))
-//        mockMvc.perform(
-//            post("/shop/product/add")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(jsonBody),
-//        )
-//            .andExpect(status().isBadRequest)
-//            .andExpect(content().string("Product name cannot be empty"))
-//    }
-//
-//    @Test
-//    fun test003createProductWithNegativePrice() {
-//        val name = "Test Product"
-//        val price = -10.0
-//        val jsonBody = """{"name": "$name", "price": $price}"""
-//
-//        whenever(productService.createProduct(name, price)).thenThrow(IllegalArgumentException("Product price must be greater than 0"))
-//
-//        mockMvc.perform(
-//            post("/shop/product/add")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(jsonBody),
-//        )
-//            .andExpect(status().isBadRequest)
-//            .andExpect(content().string("Product price must be greater than 0"))
-//    }
+    @Test
+    fun test002createProductWithEmptyName() {
+        val name = ""
+        val price = 10.0
+        val jsonBody = """{"name": "$name", "price": $price}"""
+
+        whenever(productService.createProduct(name, price)).thenReturn(
+            Mono.error(IllegalArgumentException("Product name cannot be empty")),
+        )
+
+        webTestClient.post().uri("/shop/product/add")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(jsonBody)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun test003createProductWithNegativePrice() {
+        val name = "Test Product"
+        val price = -10.0
+        val jsonBody = """{"name": "$name", "price": $price}"""
+
+        whenever(productService.createProduct(name, price)).thenReturn(
+            Mono.error(IllegalArgumentException("Product price must be greater than 0")),
+        )
+
+        webTestClient.post().uri("/shop/product/add")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(jsonBody)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
 
     @Test
     fun test004deleteProductSuccessfully() {

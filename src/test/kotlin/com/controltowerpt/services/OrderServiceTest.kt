@@ -298,7 +298,8 @@ class OrderServiceTest {
 
     @Test
     fun test011CreateOrderWithInvalidProductID() {
-        val createOrderRequest = CreateOrderRequest(direction = "Some Direction", products = listOf(ProductQuantity(0L, 1)))
+        val createOrderRequest =
+            CreateOrderRequest(direction = "Some Direction", products = listOf(ProductQuantity(0L, 1)))
 
         val result = orderService.createOrder(createOrderRequest)
 
@@ -309,7 +310,8 @@ class OrderServiceTest {
 
     @Test
     fun test012CreateOrderWithInvalidProductQuantity() {
-        val createOrderRequest = CreateOrderRequest(direction = "Some Direction", products = listOf(ProductQuantity(1L, 0)))
+        val createOrderRequest =
+            CreateOrderRequest(direction = "Some Direction", products = listOf(ProductQuantity(1L, 0)))
 
         val result = orderService.createOrder(createOrderRequest)
 
@@ -320,7 +322,8 @@ class OrderServiceTest {
 
     @Test
     fun test013CreateOrderWithInsufficientStock() {
-        val createOrderRequest = CreateOrderRequest(direction = "Some Direction", products = listOf(ProductQuantity(1L, 1)))
+        val createOrderRequest =
+            CreateOrderRequest(direction = "Some Direction", products = listOf(ProductQuantity(1L, 1)))
 
         whenever(warehouseService.checkStock(any())).thenReturn(Mono.just(false))
 
@@ -475,5 +478,170 @@ class OrderServiceTest {
         assertEquals("Order must be in delivery state to be delivered", exception.message)
         verify(orderRepository).findById(orderId)
         verify(orderRepository, never()).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test023createOrderAndProductDontExistThrowsException() {
+        val orderCreateDTO =
+            CreateOrderRequest(
+                direction = "Test Direction",
+                products = listOf(ProductQuantity(productId = 1, quantity = 1)),
+            )
+
+        whenever(productRepository.findById(1L)).thenReturn(Optional.empty())
+        whenever(warehouseService.checkStock(orderCreateDTO.products)).thenReturn(Mono.just(true))
+
+        val exception =
+            assertThrows(Exception::class.java) {
+                orderService.createOrder(orderCreateDTO).block()
+            }
+        assertEquals(
+            "java.lang.Exception: Failed to create order due to: Product with id 1 not found",
+            exception.message,
+        )
+
+        verify(productRepository, times(1)).findById(1L)
+    }
+
+    @Test
+    fun test024OrderHasBeenPickedUpThrowsExceptionWhenOrderNotFound() {
+        val orderId = 1L
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.empty())
+
+        val result = orderService.orderHasBeenPicked(orderId)
+
+        StepVerifier.create(result)
+            .expectErrorMatches { it is IllegalArgumentException && it.message == "Order with id 1 not found" }
+            .verify()
+
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository, never()).save(any())
+        verify(warehouseService, never()).orderHasBeenPickedUp(any())
+    }
+
+    @Test
+    fun test025OrderHasBeenPickedUpThrowsMonoExceptionWhenOrderIdLessThanOne() {
+        val orderId = 0L
+
+        val result = orderService.orderHasBeenPicked(orderId)
+
+        StepVerifier.create(result)
+            .expectErrorMatches { it is IllegalArgumentException && it.message == "Order id must be greater than 0" }
+            .verify()
+
+        verify(orderRepository, never()).findById(any())
+        verify(orderRepository, never()).save(any())
+        verify(warehouseService, never()).orderHasBeenPickedUp(any())
+    }
+
+    @Test
+    fun test026OrderDeliveredSuccess() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.IN_DELIVERY
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
+
+        orderService.orderDelivered(orderId)
+
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test027OrderFailedThrowsExceptionWhenOrderNotFound() {
+        val orderId = 1L
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.empty())
+
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                orderService.orderFailed(orderId)
+            }
+
+        assertEquals("Order with id $orderId not found", exception.message)
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository, never()).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test028OrderFailedThrowsExceptionWhenOrderNotInDeliveryState() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.PREPARING
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                orderService.orderFailed(orderId)
+            }
+
+        assertEquals("Order must be in delivery state to fail", exception.message)
+        verify(orderRepository).findById(orderId)
+        verify(orderRepository, never()).save(any(Order::class.java))
+    }
+
+    @Test
+    fun test029OrderHasBeenPickedThrowsExceptionWhenWarehouseServiceFail() {
+        val orderId = 1L
+        val order =
+            Order(clientDirection = "Client Direction").apply {
+                id = orderId
+                state = OrderState.PREPARED
+            }
+
+        whenever(orderRepository.findById(orderId)).thenReturn(Optional.of(order))
+        whenever(orderRepository.save(any(Order::class.java))).thenReturn(order)
+        whenever(warehouseService.orderHasBeenPickedUp(orderId)).thenReturn(Mono.just("fail"))
+
+        val result = orderService.orderHasBeenPicked(orderId)
+
+        StepVerifier.create(result)
+            .expectErrorMatches { it is Exception && it.message == "Failed to notify warehouse that the order has been picked up" }
+            .verify()
+    }
+
+    @Test
+    fun test030OrderIsReadyThrowsExceptionWhenOrderStateIsNotPreparing() {
+        val product1 = Product(name = "Product1", price = 100.0).apply { id = 1L }
+        val product2 = Product(name = "Product2", price = 200.0).apply { id = 2L }
+
+        val productOrder1 = ProductOrder(product = product1, order = Order(), amount = 1)
+        val productOrder2 = ProductOrder(product = product2, order = Order(), amount = 2)
+
+        val order =
+            Order(
+                clientDirection = "Client Direction",
+                state = OrderState.PREPARED,
+                productOrders = mutableListOf(productOrder1, productOrder2),
+            ).apply {
+                id = 1L
+                warehouse = Warehouse().apply { direction = "Warehouse Direction" }
+            }
+
+        productOrder1.order = order
+        productOrder2.order = order
+
+        whenever(orderRepository.findById(1L)).thenReturn(Optional.of(order))
+        whenever(deliveryService.initializeDelivery(any<NewDeliveryData>())).thenReturn(Mono.just(true))
+        whenever(orderRepository.save(any<Order>())).thenReturn(order)
+
+        val result = orderService.orderIsReady(1L)
+
+        StepVerifier.create(result)
+            .expectErrorMatches {
+                it is Exception && it.message ==
+                    "Failed to process order readiness: Order must be in pending state to be prepared"
+            }
+            .verify()
     }
 }
