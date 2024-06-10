@@ -154,7 +154,14 @@ class ProductServiceTest {
     fun test012deleteProductSuccessfully() {
         val id = 1L
 
-        whenever(productRep.findById(id)).thenReturn(java.util.Optional.of(Product(name = "Test Product", price = 10.0)))
+        whenever(productRep.findById(id)).thenReturn(
+            java.util.Optional.of(
+                Product(
+                    name = "Test Product",
+                    price = 10.0,
+                ),
+            ),
+        )
 
         productService.deleteProduct(id)
 
@@ -179,5 +186,28 @@ class ProductServiceTest {
         assertThrows<IllegalArgumentException> {
             productService.deleteProduct(id)
         }
+    }
+
+    @Test
+    fun test015addProductErrorWarehouseService() {
+        val name = "Test Shop"
+        val price = 10.0
+        val product = Product(name = "Test Product", price = 10.0)
+
+        whenever(productRep.save(any(Product::class.java))).thenReturn(product)
+        whenever(
+            warehouseService.createProduct(
+                product.id,
+                product.name,
+                0,
+            ),
+        ).thenReturn(Mono.error(RuntimeException("Error")))
+
+        val exception =
+            assertThrows<RuntimeException> {
+                productService.createProduct(name, price).block()
+            }
+
+        assertEquals("Error", exception.message)
     }
 }
