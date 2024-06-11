@@ -33,4 +33,13 @@ class OrderController(private val orderService: OrderService) {
             ResponseEntity.badRequest().body(e.message)
         }
     }
+
+    @DeleteMapping("/{orderId}")
+    fun deleteOrder(
+        @PathVariable orderId: Long,
+    ): Mono<ResponseEntity<Any>> {
+        return orderService.deleteOrder(orderId)
+            .then(Mono.fromCallable { ResponseEntity.noContent().build<Any>() })
+            .onErrorResume { e -> Mono.just(ResponseEntity.badRequest().body(mapOf("error" to e.message))) }
+    }
 }

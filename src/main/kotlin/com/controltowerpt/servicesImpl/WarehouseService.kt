@@ -82,4 +82,12 @@ class WarehouseService(
                 }
             }
     }
+
+    fun deleteOrder(orderId: Long): Mono<Void> {
+        val url = "http://warehouseapi:8081/order/orders/$orderId"
+        return webClient.delete()
+            .uri(url)
+            .retrieve()
+            .bodyToMono(Void::class.java)
+    }
 }

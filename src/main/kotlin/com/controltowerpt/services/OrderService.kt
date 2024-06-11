@@ -17,4 +17,6 @@ interface OrderService {
     fun orderDelivered(orderId: Long)
 
     fun orderFailed(orderId: Long)
+
+    fun deleteOrder(orderId: Long): Mono<Void>
 }

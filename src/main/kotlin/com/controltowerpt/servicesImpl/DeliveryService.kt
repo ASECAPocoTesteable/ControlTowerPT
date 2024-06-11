@@ -47,4 +47,12 @@ class DeliveryService(
             warehouseDirection = newDeliveryData.warehouseDirection,
         )
     }
+
+    fun deleteOrder(orderId: Long): Mono<Void> {
+        val url = "http://deliveryapi:8082/order/$orderId"
+        return webClient.delete()
+            .uri(url)
+            .retrieve()
+            .bodyToMono(Void::class.java)
+    }
 }

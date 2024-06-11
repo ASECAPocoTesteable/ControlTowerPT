@@ -195,4 +195,17 @@ class OrderServiceImpl(
 
         orderRepository.save(order)
     }
+
+    override fun deleteOrder(orderId: Long): Mono<Void> {
+        return Mono.fromCallable {
+            orderRepository.deleteById(orderId)
+        }
+            .subscribeOn(Schedulers.boundedElastic())
+            .then(
+                Mono.`when`(
+                    warehouseService.deleteOrder(orderId),
+                    deliveryService.deleteOrder(orderId),
+                ),
+            )
+    }
 }
