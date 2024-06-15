@@ -10,6 +10,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      WAREHOUSE_URL: ${{ secrets.WAREHOUSE_URL }}
+      DELIVERY_URL: ${{ secrets.DELIVERY_URL }}
+
     steps:
       - uses: actions/checkout@v2
 
@@ -19,6 +24,11 @@ jobs:
             distribution: 'corretto'
             java-version: '17'
             cache: gradle
+
+      - name : Create.env file
+        run : |
+            echo "WAREHOUSE_URL=${WAREHOUSE_URL}" >> .env
+            echo "DELIVERY_URL=${DELIVERY_URL}" >> .env
 
       - name: Setup Gradle 8.4
         uses: gradle/actions/setup-gradle@v3

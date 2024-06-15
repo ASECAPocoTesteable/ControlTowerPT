@@ -51,6 +51,7 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.15.4"
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 
 }
 
@@ -97,4 +98,8 @@ tasks.register("ktlintFormat", JavaExec) {
 	jvmArgs "--add-opens=java.base/java.lang=ALL-UNNAMED"
 	// see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
 	args "-F", "src/**/*.kt", "**.kts", "!**/build/**"
+}
+
+test{
+    exclude("**/integration/**")
 }

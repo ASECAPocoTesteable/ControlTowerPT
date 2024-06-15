@@ -1,6 +1,7 @@
 import com.controltowerpt.controllers.dto.request.NewDeliveryData
 import com.controltowerpt.controllers.dto.request.ProductQuantityDTO
 import com.controltowerpt.servicesImpl.DeliveryService
+import io.github.cdimascio.dotenv.Dotenv
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,12 +15,16 @@ import reactor.test.StepVerifier
 
 class DeliveryServiceTest {
     private lateinit var webClient: WebClient
+
     private lateinit var deliveryService: DeliveryService
+
+    private lateinit var environment: Dotenv
 
     @BeforeEach
     fun setUp() {
+        environment = mock(Dotenv::class.java)
         webClient = mock(WebClient::class.java)
-        deliveryService = DeliveryService(webClient)
+        deliveryService = DeliveryService(webClient, environment)
     }
 
     @Test

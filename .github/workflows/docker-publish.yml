@@ -37,3 +37,5 @@ jobs:
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
             DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            WAREHOUSE_URL=${{ secrets.WAREHOUSE_URL }}
+            DELIVERY_URL=${{ secrets.DELIVERY_URL }}

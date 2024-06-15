@@ -15,6 +15,7 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+src/test/resources/application-integration.properties
 .env
 ### IntelliJ IDEA ###
 .idea
