@@ -7,6 +7,7 @@ import com.controltowerpt.controllers.dto.request.ProductWarehouseDTO
 import com.controltowerpt.models.Warehouse
 import com.controltowerpt.repositories.WarehouseRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -15,9 +16,10 @@ import reactor.core.publisher.Mono
 class WarehouseService(
     @Autowired private val webClient: WebClient,
     private val warehouseRepository: WarehouseRepository,
+    @Autowired private val environment: Environment,
 ) {
     fun checkStock(products: List<ProductQuantity>): Mono<Boolean> {
-        val url = "http://warehouseapi:8081/order/create"
+        val url = "http://${environment.getProperty("warehouse_url")}/order/create"
 
         // Wrap the list in a ProductStockRequestDto
         val requestDto =

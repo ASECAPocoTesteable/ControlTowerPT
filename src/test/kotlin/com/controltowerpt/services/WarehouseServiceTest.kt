@@ -9,6 +9,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
@@ -16,16 +19,25 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.util.*
 
+@SpringBootTest
 class WarehouseServiceTest {
+    @Autowired
     private lateinit var webClient: WebClient
+
+    @Autowired
     private lateinit var warehouseService: WarehouseService
+
+    @Autowired
     private lateinit var warehouseRepository: WarehouseRepository
+
+    @Autowired
+    private lateinit var environment: Environment
 
     @BeforeEach
     fun setUp() {
         webClient = mock(WebClient::class.java)
         warehouseRepository = mock(WarehouseRepository::class.java)
-        warehouseService = WarehouseService(webClient, warehouseRepository)
+        warehouseService = WarehouseService(webClient, warehouseRepository, environment)
     }
 
     @Test

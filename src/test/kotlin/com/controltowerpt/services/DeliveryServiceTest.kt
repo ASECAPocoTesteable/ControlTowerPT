@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
@@ -14,12 +15,16 @@ import reactor.test.StepVerifier
 
 class DeliveryServiceTest {
     private lateinit var webClient: WebClient
+
     private lateinit var deliveryService: DeliveryService
+
+    private lateinit var environment: Environment
 
     @BeforeEach
     fun setUp() {
+        environment = mock(Environment::class.java)
         webClient = mock(WebClient::class.java)
-        deliveryService = DeliveryService(webClient)
+        deliveryService = DeliveryService(webClient, environment)
     }
 
     @Test
