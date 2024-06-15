@@ -25,6 +25,11 @@ jobs:
             java-version: '17'
             cache: gradle
 
+      - name : Create.env file
+        run : |
+            echo "WAREHOUSE_URL=${WAREHOUSE_URL}" >> .env
+            echo "DELIVERY_URL=${DELIVERY_URL}" >> .env
+
       - name: Setup Gradle 8.4
         uses: gradle/actions/setup-gradle@v3
         with:
