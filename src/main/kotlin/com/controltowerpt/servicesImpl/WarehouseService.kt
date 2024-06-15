@@ -6,8 +6,8 @@ import com.controltowerpt.controllers.dto.request.ProductQuantity
 import com.controltowerpt.controllers.dto.request.ProductWarehouseDTO
 import com.controltowerpt.models.Warehouse
 import com.controltowerpt.repositories.WarehouseRepository
+import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -16,10 +16,10 @@ import reactor.core.publisher.Mono
 class WarehouseService(
     @Autowired private val webClient: WebClient,
     private val warehouseRepository: WarehouseRepository,
-    @Autowired private val environment: Environment,
+    @Autowired private val environment: Dotenv,
 ) {
     fun checkStock(products: List<ProductQuantity>): Mono<Boolean> {
-        val url = "http://${environment.getProperty("warehouse_url")}/order/create"
+        val url = "http://${environment["warehouse_url"]}/order/create"
 
         // Wrap the list in a ProductStockRequestDto
         val requestDto =
@@ -48,7 +48,7 @@ class WarehouseService(
     }
 
     fun orderHasBeenPickedUp(orderId: Long): Mono<String> {
-        val url = "http://warehouseapi:8081/order/picked-up/$orderId"
+        val url = "http://${environment["warehouse_url"]}/order/picked-up/$orderId"
 
         return webClient.put()
             .uri(url)
@@ -69,7 +69,8 @@ class WarehouseService(
         name: String,
         stockQuantity: Int,
     ): Mono<String> {
-        val url = "http://warehouseapi:8081/product/add"
+        val url = "http://${environment["warehouse_url"]}/product/add"
+        println(url)
 
         return webClient.post()
             .uri(url)
@@ -86,7 +87,7 @@ class WarehouseService(
     }
 
     fun deleteOrder(orderId: Long): Mono<Void> {
-        val url = "http://warehouseapi:8081/order/orders/$orderId"
+        val url = "http://${environment["warehouse_url"]}/order/orders/$orderId"
         return webClient.delete()
             .uri(url)
             .retrieve()

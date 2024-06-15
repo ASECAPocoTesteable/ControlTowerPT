@@ -1,12 +1,12 @@
 import com.controltowerpt.controllers.dto.request.NewDeliveryData
 import com.controltowerpt.controllers.dto.request.ProductQuantityDTO
 import com.controltowerpt.servicesImpl.DeliveryService
+import io.github.cdimascio.dotenv.Dotenv
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
@@ -18,11 +18,11 @@ class DeliveryServiceTest {
 
     private lateinit var deliveryService: DeliveryService
 
-    private lateinit var environment: Environment
+    private lateinit var environment: Dotenv
 
     @BeforeEach
     fun setUp() {
-        environment = mock(Environment::class.java)
+        environment = mock(Dotenv::class.java)
         webClient = mock(WebClient::class.java)
         deliveryService = DeliveryService(webClient, environment)
     }

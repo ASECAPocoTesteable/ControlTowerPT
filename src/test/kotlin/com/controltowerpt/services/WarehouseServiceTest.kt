@@ -4,6 +4,7 @@ import com.controltowerpt.controllers.dto.request.ProductQuantity
 import com.controltowerpt.models.Warehouse
 import com.controltowerpt.repositories.WarehouseRepository
 import com.controltowerpt.servicesImpl.WarehouseService
+import io.github.cdimascio.dotenv.Dotenv
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -11,7 +12,6 @@ import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
@@ -31,7 +31,7 @@ class WarehouseServiceTest {
     private lateinit var warehouseRepository: WarehouseRepository
 
     @Autowired
-    private lateinit var environment: Environment
+    private lateinit var environment: Dotenv
 
     @BeforeEach
     fun setUp() {

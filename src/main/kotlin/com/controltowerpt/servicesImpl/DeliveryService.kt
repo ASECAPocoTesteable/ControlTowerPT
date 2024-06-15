@@ -3,8 +3,8 @@ package com.controltowerpt.servicesImpl
 import com.controltowerpt.controllers.dto.request.NewDeliveryData
 import com.controltowerpt.controllers.dto.request.OrderDTO
 import com.controltowerpt.controllers.dto.request.ProductQuantityDTO
+import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -12,10 +12,10 @@ import reactor.core.publisher.Mono
 @Service
 class DeliveryService(
     @Autowired private val webClient: WebClient,
-    @Autowired private val environment: Environment,
+    @Autowired private val environment: Dotenv,
 ) {
     fun initializeDelivery(deliveryData: NewDeliveryData): Mono<Boolean> {
-        val url = "http://${environment.getProperty("delivery_url")}/order"
+        val url = "http://${environment["delivery_url"]}/order"
 
         val orderDTO = transformToOrderDTO(deliveryData)
 
@@ -51,7 +51,7 @@ class DeliveryService(
     }
 
     fun deleteOrder(orderId: Long): Mono<Void> {
-        val url = "http://deliveryapi:8082/order/$orderId"
+        val url = "http://${environment["delivery_url"]}/order/$orderId"
         return webClient.delete()
             .uri(url)
             .retrieve()

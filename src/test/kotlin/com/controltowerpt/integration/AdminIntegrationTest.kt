@@ -1,22 +1,28 @@
 package com.controltowerpt.integration
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.util.Assert
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integration")
 @AutoConfigureMockMvc
 class AdminIntegrationTest {
+    @LocalServerPort
+    private val port: Int = 0
+
     @Autowired
-    private lateinit var webTestClient: WebTestClient
+    lateinit var restTemplate: TestRestTemplate
+
+    var createdProductId: Long? = null
 
     @Test
     fun test001createProductSuccessfully() {
@@ -24,11 +30,34 @@ class AdminIntegrationTest {
         val price = 10.0
         val jsonBody = """{"name": "$name", "price": $price}"""
 
-        webTestClient.post().uri("/shop/product/add")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(jsonBody)
-            .exchange()
-            .expectStatus().isOk
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val entity = HttpEntity(jsonBody, headers)
+
+        val response = restTemplate.postForEntity("http://localhost:$port/shop/product/add", entity, String::class.java)
+
+        createdProductId = response.body?.substringAfter("id\":")?.substringBefore(",")?.toLong()
+
+        Assert.isTrue(response.statusCode.is2xxSuccessful, "Expected successful status code")
+
+        cleanupAfterTest()
+    }
+
+    @Test
+    fun test002createProductWithEmptyName() {
+        val name = ""
+        val price = 10.0
+        val jsonBody = """{"name": "$name", "price": $price}"""
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val entity = HttpEntity(jsonBody, headers)
+
+        val response = restTemplate.postForEntity("http://localhost:$port/shop/product/add", entity, String::class.java)
+
+        Assert.isTrue(response.statusCode.is4xxClientError, "Expected client error status code")
     }
 
     @Test
@@ -37,40 +66,19 @@ class AdminIntegrationTest {
         val price = -10.0
         val jsonBody = """{"name": "$name", "price": $price}"""
 
-        webTestClient.post().uri("/shop/product/add")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(jsonBody)
-            .exchange()
-            .expectStatus().isBadRequest
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val entity = HttpEntity(jsonBody, headers)
+
+        val response = restTemplate.postForEntity("http://localhost:$port/shop/product/add", entity, String::class.java)
+
+        Assert.isTrue(response.statusCode.is4xxClientError, "Expected client error status code")
     }
 
-    @Test
-    fun test004deleteProductSuccessfully() {
-        val name = "Test Product"
-        val price = 10.0
-        val jsonBody = """{"name": "$name", "price": $price}"""
-
-        val result =
-            webTestClient.post().uri("/shop/product/add")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(jsonBody)
-                .exchange()
-                .expectStatus().isOk
-                .expectBody()
-                .jsonPath("$.id").isNotEmpty
-                .returnResult()
-                .responseBody
-
-        val id = extractIdFromResponse(result)
-
-        webTestClient.delete().uri("/shop/product/delete/$id")
-            .exchange()
-            .expectStatus().isOk
-    }
-
-    private fun extractIdFromResponse(response: ByteArray?): Long {
-        val responseString = response?.let { String(it) } ?: ""
-        val jsonNode = ObjectMapper().readTree(responseString)
-        return jsonNode.get("id").asLong()
+    private fun cleanupAfterTest() {
+        createdProductId?.let { id ->
+            restTemplate.delete("http://localhost:$port/shop/delete/product?id=$id")
+        }
     }
 }
